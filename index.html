@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>S60Tok</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    html, body {
+      height:100%;
+      background:#000;
+      color:#fff;
+      font-family: Arial, sans-serif;
+      overflow:hidden;
+    }
+    #container {
+      display:flex;
+      flex-direction:column;
+      height:100%;
+      max-width:100%;
+    }
+    #header {
+      background:#1a1a2e;
+      padding:4px 0;        /* уменьшили */
+      text-align:center;
+      font-size:16px;       /* уменьшили */
+      font-weight:bold;
+      border-bottom:2px solid #333;
+      flex-shrink:0;
+    }
+    #main {
+      flex:1;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      position:relative;
+      overflow:hidden;
+    }
+    #photo-container {
+      width:100%;
+      height:100%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:#111;
+    }
+    #photo-container img {
+      max-width:100%;
+      max-height:100%;
+      object-fit:contain;
+      display:block;
+    }
+    #info {
+      position:absolute;
+      bottom:0;
+      left:0;
+      right:0;
+      background:rgba(0,0,0,0.7);
+      padding:4px 8px;      /* уменьшили */
+      font-size:12px;       /* уменьшили */
+      text-align:center;
+      border-top:1px solid #333;
+    }
+    #info span {
+      color:#fff;
+      font-weight:bold;
+    }
+    #controls {
+      display:flex;
+      justify-content:space-between;
+      padding:4px 8px;      /* уменьшили */
+      background:#1a1a2e;
+      border-top:1px solid #333;
+      flex-shrink:0;
+      align-items:center;
+    }
+    #controls button {
+      background:#2a2a4a;
+      color:#fff;
+      border:1px solid #555;
+      border-radius:3px;
+      padding:4px 10px;      /* маленькие кнопки */
+      font-size:12px;        /* мелкий шрифт */
+      cursor:pointer;
+      min-width:50px;        /* уже */
+      height:28px;           /* фиксированная высота */
+    }
+    #controls button:active {
+      background:#3a3a6a;
+    }
+    #counter {
+      font-size:12px;
+      padding:0 4px;
+      color:#ccc;
+    }
+    /* Для экранов 128x160 - ещё мельче */
+    @media (max-width: 160px) {
+      #header { font-size:13px; padding:3px 0; }
+      #controls button { font-size:10px; padding:2px 6px; min-width:40px; height:22px; }
+      #counter { font-size:10px; }
+      #info { font-size:10px; padding:2px 6px; }
+    }
+  </style>
+</head>
+<body>
+<div id="container">
+  <div id="header">S60Tok</div>
+  <div id="main">
+    <div id="photo-container">
+      <img id="photo" src="" alt="фото">
+    </div>
+    <div id="info"><span id="label">User</span> <span id="name"></span></div>
+  </div>
+  <div id="controls">
+    <button id="prevBtn">Назад</button>
+    <div id="counter">1 / 1</div>
+    <button id="nextBtn">Вперёд</button>
+  </div>
+</div>
+
+<script src="images.js"></script>
+<script>
+  // Весь JS тот же, без изменений
+  (function() {
+    if (typeof imageList === 'undefined' || !Array.isArray(imageList) || imageList.length === 0) {
+      document.getElementById('photo').alt = 'Нет фото';
+      document.getElementById('name').textContent = 'загрузите фото';
+      document.getElementById('counter').textContent = '0 / 0';
+      return;
+    }
+    function shuffle(arr) {
+      for (var i = arr.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var temp = arr[i];
+        arr[i] = arr[j];
+        arr[j] = temp;
+      }
+      return arr;
+    }
+    var shuffled = shuffle(imageList.slice());
+    var currentIndex = 0;
+    var total = shuffled.length;
+    var photoEl = document.getElementById('photo');
+    var nameEl = document.getElementById('name');
+    var counterEl = document.getElementById('counter');
+    function updatePhoto(index) {
+      var path = shuffled[index];
+      photoEl.src = path;
+      photoEl.alt = path.split('/').pop();
+      var name = path.split('/').pop().replace(/\.[^/.]+$/, '') || 'фото';
+      nameEl.textContent = name;
+      counterEl.textContent = (index + 1) + ' / ' + total;
+    }
+    function nextPhoto() {
+      currentIndex = (currentIndex + 1) % total;
+      updatePhoto(currentIndex);
+    }
+    function prevPhoto() {
+      currentIndex = (currentIndex - 1 + total) % total;
+      updatePhoto(currentIndex);
+    }
+    document.getElementById('nextBtn').addEventListener('click', nextPhoto);
+    document.getElementById('prevBtn').addEventListener('click', prevPhoto);
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+        e.preventDefault();
+        nextPhoto();
+      } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+        e.preventDefault();
+        prevPhoto();
+      }
+    });
+    document.getElementById('photo-container').addEventListener('click', function(e) {
+      if (!e.target.closest('#controls')) {
+        nextPhoto();
+      }
+    });
+    updatePhoto(0);
+  })();
+</script>
+</body>
+</html>
