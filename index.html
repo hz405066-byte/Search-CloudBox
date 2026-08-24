@@ -20,42 +20,37 @@ button{background:#333;color:#fff;border:1px solid #555;padding:4px 10px;font-si
 hr{border:0;border-top:1px solid #333;margin:6px 0}
 .footer{text-align:center;font-size:xx-small;color:#555;margin-top:10px}
 .nav a{margin:0 4px;font-size:x-small;color:#999}
-/* Компактная шапка результатов */
 .rhead{padding:2px 0;border-bottom:1px solid #333;margin-bottom:6px}
 .rlogo{color:#fff;font-weight:bold;font-size:x-small;white-space:nowrap;margin-right:4px}
 .rform input{width:55%;font-size:x-small;padding:2px 4px;background:#222;color:#fff;border:1px solid #555}
 .rform button{padding:2px 6px;font-size:xx-small}
-/* Вкладки как в Google: активная — светлее и с синей полоской сверху */
 .tabs{margin:6px 0 8px 0;padding:0 2px 4px 2px;border-bottom:1px solid #333;font-size:x-small}
 .tabs a{display:inline-block;padding:3px 9px;margin-right:4px;border:1px solid #444;border-bottom:none;background:#191919;color:#8ab4f8;text-decoration:none;border-radius:4px 4px 0 0}
 .tabs b{display:inline-block;padding:3px 9px;margin-right:4px;border:1px solid #555;border-bottom:none;border-top:2px solid #8ab4f8;background:#333;color:#fff;border-radius:4px 4px 0 0}
 .tabs a.tiny{display:inline;padding:0;margin-left:6px;border:none;background:none;color:#777;border-radius:0}
-/* Поиск картинок */
 .engc{margin:6px 0 2px 0;text-align:center}
 .engc label{margin:0 4px;white-space:nowrap;color:#bbb;font-size:x-small}
 .engc input{vertical-align:middle;margin:0 2px 0 0}
 .tiny{font-size:xx-small;color:#777}
 img.th{border:1px solid #444;background:#000}
+#vimg{width:auto;height:auto}
+.xclose{color:#f88;font-weight:bold;font-size:small;text-decoration:none}
 </style>
 </head>
 <body>
 
-<!-- ===== ГЛАВНАЯ ===== -->
 <div id="p1">
 <h1>CloudBox</h1>
 <div class="center" style="font-size:x-small;color:#888;margin-bottom:8px">Приватный поиск</div>
-
 <form onsubmit="return srch()">
 <div class="center">
 <input type="text" id="q" name="q"/><br/>
 <button type="submit">Поиск</button>
 </div>
 </form>
-
 <div class="center tiny" style="margin-top:4px">
 фильтр: <a href="#" onclick="tSafe();return false">[ <span id="safest1">вкл</span> ]</a>
 </div>
-
 <hr/>
 <div class="nav center">
 <a href="#" onclick="openImg();return false">Картинки</a>|<a href="#">Новости</a>
@@ -63,7 +58,6 @@ img.th{border:1px solid #444;background:#000}
 <div class="footer">&copy; 2026 CloudBox<br/>Mobile Edition</div>
 </div>
 
-<!-- ===== РЕЗУЛЬТАТЫ WEB (с вкладками) ===== -->
 <div id="p2" style="display:none">
 <div class="rhead">
 <table width="100%" cellpadding="0" cellspacing="0"><tr>
@@ -85,7 +79,6 @@ img.th{border:1px solid #444;background:#000}
 <div class="footer">&copy; 2026 CloudBox</div>
 </div>
 
-<!-- ===== КАРТИНКИ (дизайн как у результатов, с вкладками) ===== -->
 <div id="p3" style="display:none">
 <div class="rhead">
 <table width="100%" cellpadding="0" cellspacing="0"><tr>
@@ -112,13 +105,34 @@ img.th{border:1px solid #444;background:#000}
 <div class="footer">&copy; 2026 CloudBox<br/>Images Edition</div>
 </div>
 
+<!-- ===== ПРОСМОТРЩИК ФОТО ===== -->
+<div id="p4" style="display:none">
+<div class="rhead">
+<table width="100%" cellpadding="0" cellspacing="0"><tr>
+<td><span class="rlogo">CloudBox::Фото</span></td>
+<td align="right"><a href="#" onclick="closeView();return false" class="xclose">[X]</a></td>
+</tr></table>
+</div>
+<div class="center"><img id="vimg" class="th" alt=""/></div>
+<div class="center" style="margin-top:6px">
+<button onclick="viewPrev()">&laquo; Назад</button>
+<button onclick="viewNext()">Вперёд &raquo;</button>
+<button onclick="viewGo()">Перейти</button>
+</div>
+<div class="footer">&copy; 2026 CloudBox</div>
+</div>
+
 <script>
 //<![CDATA[
 var D=[];
 var loaded=false;
-
-/* ===== БАЗА: берётся с GitHub ===== */
 var DB_URL='https://raw.githubusercontent.com/hz405066-byte/Search-CloudBox/refs/heads/main/db.json';
+
+/* КЛЮЧ PIXABAY (необязательно): вставьте между кавычек — источник оживёт */
+var PIXABAY_KEY='';
+
+/* 1 = вернуть Google/Яндекс через прокси; 0 = не дёргать прокси вообще */
+var USE_PROXY_SRC=0;
 
 function parseDB(txt){
 if(!txt)return false;
@@ -177,7 +191,6 @@ x.send(null);
 }catch(e){}
 }
 
-/* ===== СПИСОК КАРТИНОЧНЫХ ПОИСКОВИКОВ (без Google и Яндекс) ===== */
 var IMGEN=[
 ['DuckDuckGo','https://duckduckgo.com/?q={q}&iax=images&ia=i',1,'&kp=1','&kp=-1'],
 ['Bing','https://www.bing.com/images/search?q={q}',1,'&adlt=strict','&adlt=off'],
@@ -187,10 +200,11 @@ var IMGEN=[
 ['Startpage','https://www.startpage.com/search?query={q}&cat=images',0,'',''],
 ['Swisscows','https://swisscows.com/images?query={q}',0,'',''],
 ['Yahoo','https://images.search.yahoo.com/search/images?p={q}',0,'&vm=1','&vm=0'],
-['Openverse','https://openverse.org/search/image?q={q}',0,'','']
+['Openverse','https://openverse.org/search/image?q={q}',0,'',''],
+['Google','https://www.google.com/search?q={q}&tbm=isch',0,'&safe=active','&safe=off'],
+['Yandex','https://yandex.ru/images/search?text={q}',0,'&family=yes','']
 ];
 
-/* ===== ФИЛЬТР 18+ (переключается ТОЛЬКО на главной) ===== */
 var safeOn=1;
 var BAD=/\b(porn|porno|nude|nudity|nsfw|erotic|erotica|hentai|fetish|topless|genitals?|vagina|penis|breasts?|boobs|xxx|sex)\b/i;
 var lastWebQ='';
@@ -225,11 +239,11 @@ go(q);
 return false;
 }
 
-/* ===== ВКЛАДКИ: запрос переносится между Результат и Картинки ===== */
 function toImg(){
 var q=document.getElementById('q2').value||lastWebQ;
 document.getElementById('p1').style.display='none';
 document.getElementById('p2').style.display='none';
+document.getElementById('p4').style.display='none';
 document.getElementById('p3').style.display='block';
 document.getElementById('iq').value=q;
 buildEng();
@@ -269,20 +283,14 @@ document.getElementById('res').innerHTML=h;
 document.getElementById('p1').style.display='none';
 document.getElementById('p2').style.display='block';
 document.getElementById('p3').style.display='none';
+document.getElementById('p4').style.display='none';
 window.scrollTo(0,0);
-}
-
-function lk(){
-loadDB();
-var q=document.getElementById('q').value;
-if(!q||!q.replace(/\s/g,'')){alert('Введите запрос');return;}
-var r=D[Math.floor(Math.random()*D.length)];
-alert('Мне повезло!\n'+r.t+'\nhttp://'+r.u);
 }
 
 function bk(){
 document.getElementById('p2').style.display='none';
 document.getElementById('p3').style.display='none';
+document.getElementById('p4').style.display='none';
 document.getElementById('p1').style.display='block';
 document.getElementById('q').value='';
 document.title='CloudBox';
@@ -292,15 +300,16 @@ document.getElementById('q').focus();
 function hm(){
 document.getElementById('p2').style.display='none';
 document.getElementById('p3').style.display='none';
+document.getElementById('p4').style.display='none';
 document.getElementById('p1').style.display='block';
 document.title='CloudBox';
 window.scrollTo(0,0);
 }
 
-/* с главной — сразу в картинки */
 function openImg(){
 document.getElementById('p1').style.display='none';
 document.getElementById('p2').style.display='none';
+document.getElementById('p4').style.display='none';
 document.getElementById('p3').style.display='block';
 var el=document.getElementById('iq');
 var q=document.getElementById('q').value||document.getElementById('q2').value;
@@ -314,7 +323,6 @@ window.scrollTo(0,0);
 try{el.focus();}catch(e){}
 }
 
-/* ===== ВЫБОР ПОИСКОВИКОВ (скрытый) ===== */
 function buildEng(){
 var box=document.getElementById('engs');
 if(box.getElementsByTagName('input').length!==IMGEN.length){
@@ -348,11 +356,53 @@ for(var i=0;i<c.length;i++){if(c[i].checked)n++;}
 document.getElementById('engcnt').innerHTML=''+n;
 }
 
-/* ===== КАРТИНКИ ===== */
+/* ===== КАРТИНКИ: ядро без ключей и прокси (Commons, Openverse, Flickr, Reddit) ===== */
 var lastQ='';
 var lastSel=[];
 var prevReqId=0;
 var imgTimer=null;
+var VIEWS=[];
+var vCur=0;
+var ITEMS=[];
+var shownCount=0;
+var flickrSeq=0;
+
+function addView(full,go){VIEWS.push({full:full,go:go});return VIEWS.length-1;}
+function openView(i){vCur=i;showView();}
+
+function fitView(){
+var img=document.getElementById('vimg');
+var w=0,h=0;
+try{w=window.innerWidth||screen.width;}catch(e){}
+try{h=window.innerHeight||screen.height;}catch(e){}
+if(!w)w=240;
+if(!h)h=320;
+img.style.width='auto';
+img.style.height='auto';
+img.style.maxWidth=(w-6)+'px';
+img.style.maxHeight=Math.max(100,h-110)+'px';
+}
+
+function showView(){
+var v=VIEWS[vCur];
+if(!v)return;
+fitView();
+document.getElementById('vimg').src=v.full;
+document.getElementById('p1').style.display='none';
+document.getElementById('p2').style.display='none';
+document.getElementById('p3').style.display='none';
+document.getElementById('p4').style.display='block';
+window.scrollTo(0,0);
+}
+
+function viewPrev(){if(VIEWS.length){vCur=(vCur-1+VIEWS.length)%VIEWS.length;showView();}}
+function viewNext(){if(VIEWS.length){vCur=(vCur+1)%VIEWS.length;showView();}}
+function viewGo(){if(VIEWS[vCur])window.location.href=VIEWS[vCur].go;}
+function closeView(){
+document.getElementById('p4').style.display='none';
+document.getElementById('p3').style.display='block';
+window.scrollTo(0,0);
+}
 
 function iqLive(){
 if(imgTimer)clearTimeout(imgTimer);
@@ -406,65 +456,321 @@ drawIres(lastQ,'<div class="desc">Загрузка превью&hellip;</div>','
 cprev(lastQ);
 }
 
+/* быстрые сразу (8 на экран), остальные догоняют параллельно */
 function cprev(q){
 var id=++prevReqId;
+ITEMS=[];
+shownCount=0;
+function add(L){
+if(id!==prevReqId)return;
+if(L&&L.length){ITEMS=ITEMS.concat(L);drawNow();}
+}
+srcCommons(q,function(L1){
+if(id!==prevReqId)return;
+if(L1)ITEMS=ITEMS.concat(L1);
+srcOpenverse(q,function(L2){
+if(id!==prevReqId)return;
+if(L2)ITEMS=ITEMS.concat(L2);
+firstDraw();
+if(USE_PROXY_SRC){srcGoogle(q,add);srcYandex(q,add);}
+srcPixabay(q,add);
+srcFlickr(q,add);
+srcReddit(q,add);
+});
+});
+}
+
+function firstDraw(){
+if(ITEMS.length>0){
+shownCount=Math.min(8,ITEMS.length);
+drawNow();
+}else{
+drawIres(lastQ,'<div class="desc">Превью не загрузилось. '+
+'<a href="#" onclick="retryPrev();return false">[повторить]</a></div>','');
+}
+}
+
+function moreImgs(){
+shownCount=Math.min(ITEMS.length,shownCount+8);
+drawNow();
+}
+
+function drawNow(){
+var g=renderSlice();
+if(g){
+if(shownCount<ITEMS.length){
+g+='<div class="center" style="margin-top:6px"><a href="#" onclick="moreImgs();return false">[ещё фото: '+Math.min(8,ITEMS.length-shownCount)+']</a></div>';
+}
+document.title='CloudBox::Картинки: '+lastQ;
+drawIres(lastQ,g,tm());
+}
+}
+
+/* 1: до 20 */
+function srcCommons(q,done){
+var fin=false;
+function end(v){if(!fin){fin=true;done(v);}}
 var qs=q+(safeOn?' -porn -nude -nsfw -erotic -hentai':'');
 var u='https://commons.wikimedia.org/w/api.php?action=query&format=json&origin=*'+
-'&generator=search&gsrnamespace=6&gsrlimit=8&gsrsearch='+encodeURIComponent(qs)+
-'&prop=imageinfo&iiprop=url|thumburl&iiurlwidth=160';
+'&generator=search&gsrnamespace=6&gsrlimit=20&gsrsearch='+encodeURIComponent(qs)+
+'&prop=imageinfo&iiprop=url|thumburl|mime&iiurlwidth=160';
 try{
 var x=new XMLHttpRequest();
-var t=setTimeout(function(){
-if(id===prevReqId){try{x.abort();}catch(e){}prevFail(q);}
-},12000);
+var t=setTimeout(function(){end(null);},12000);
 x.open('GET',u,true);
 x.onreadystatechange=function(){
 if(x.readyState===4){
 clearTimeout(t);
-if(id!==prevReqId)return;
 if(x.status===200||x.status===0){
 try{
-var g=buildGrid(eval('('+x.responseText+')'));
-if(g){
-document.title='CloudBox::Картинки: '+q;
-drawIres(q,g,tm());
-return;
-}
-}catch(e){}
-}
-prevFail(q);
-}
-};
-x.send(null);
-}catch(e){if(id===prevReqId)prevFail(q);}
-}
-
-function prevFail(q){
-drawIres(q,'<div class="desc">Превью не загрузилось. '+
-'<a href="#" onclick="retryPrev();return false">[повторить]</a> &middot; '+
-'<a href="https://commons.wikimedia.org/w/index.php?search='+encodeURIComponent(q)+'">[открыть Commons]</a></div>','');
-}
-
-function buildGrid(r){
-if(!r||!r.query||!r.query.pages)return '';
+var r=eval('('+x.responseText+')');
+var out=[];
+if(r&&r.query&&r.query.pages){
 var p=r.query.pages;
-var h='<div class="desc">Wikimedia Commons:</div>';
-h+='<div style="max-width:260px;margin:0 auto">';
-h+='<table width="100%" cellpadding="0" cellspacing="2"><tr>';
-var n=0;
 for(var k in p){
 if(!p[k].imageinfo)continue;
 var title=p[k].title||'';
 if(safeOn&&BAD.test(title))continue;
 var ii=p[k].imageinfo[0];
-if(n>0&&n%2===0)h+='</tr><tr>';
-h+='<td align="center" width="50%">'+
-'<a href="'+ii.descriptionurl+'"><img class="th" src="'+ii.thumburl+'" width="95%" alt=""/></a>'+
-'<div class="tiny">'+esc(short(title))+'</div></td>';
-n++;
+var mime=ii.mime||'';
+if(mime&&mime.indexOf('image/jpeg')!==0&&mime.indexOf('image/png')!==0&&mime.indexOf('image/gif')!==0)continue;
+out.push({th:ii.thumburl,full:ii.url||ii.thumburl,go:ii.descriptionurl,cap:short(title)});
+if(out.length>=20)break;
 }
-if(n===0)return '';
-while(n%2!==0){h+='<td width="50%"></td>';n++;}
+}
+end(out);return;
+}catch(e){}
+}
+end(null);
+}
+};
+x.send(null);
+}catch(e){end(null);}
+}
+
+/* 2: до 10 */
+function srcOpenverse(q,done){
+var fin=false;
+function end(v){if(!fin){fin=true;done(v);}}
+try{
+var x=new XMLHttpRequest();
+var t=setTimeout(function(){end(null);},8000);
+x.open('GET','https://api.openverse.org/v1/images/?q='+encodeURIComponent(q)+'&page_size=10',true);
+x.onreadystatechange=function(){
+if(x.readyState===4){
+clearTimeout(t);
+if(x.status===200||x.status===0){
+try{
+var r=eval('('+x.responseText+')');
+var out=[];
+if(r&&r.results){
+for(var i=0;i<r.results.length;i++){
+var it=r.results[i];
+if(!it||!it.thumbnail)continue;
+if(safeOn&&BAD.test(it.title||''))continue;
+out.push({th:it.thumbnail,full:it.url||it.thumbnail,go:it.foreign_landing_url||it.url||it.thumbnail,cap:short(it.title||'')});
+if(out.length>=10)break;
+}
+}
+end(out);return;
+}catch(e){}
+}
+end(null);
+}
+};
+x.send(null);
+}catch(e){end(null);}
+}
+
+/* 3: Google через прокси (только при USE_PROXY_SRC=1) */
+function srcGoogle(q,done){
+var fin=false;
+function end(v){if(!fin){fin=true;done(v);}}
+try{
+var gu='https://www.google.com/search?q='+encodeURIComponent(q)+'&tbm=isch&num=30';
+var x=new XMLHttpRequest();
+var t=setTimeout(function(){end(null);},9000);
+x.open('GET','https://api.allorigins.win/raw?url='+encodeURIComponent(gu),true);
+x.onreadystatechange=function(){
+if(x.readyState===4){
+clearTimeout(t);
+if(x.status===200||x.status===0){
+var txt=(x.responseText||'').replace(/\\\//g,'/');
+var re=/https:\/\/encrypted-tbn0\.gstatic\.com\/images\?q=tbn(%3D|=|:)[A-Za-z0-9_-]+/g;
+var m,out=[],seen={};
+while((m=re.exec(txt))!==null&&out.length<10){
+var u=m[0].replace('%3D','=');
+if(seen[u])continue;
+seen[u]=1;
+out.push({th:u,full:u,go:'https://www.google.com/search?q='+encodeURIComponent(q)+'&tbm=isch',cap:'фото'});
+}
+if(out.length){end(out);return;}
+}
+end(null);
+}
+};
+x.send(null);
+}catch(e){end(null);}
+}
+
+/* 4: Яндекс через прокси (только при USE_PROXY_SRC=1) */
+function srcYandex(q,done){
+var fin=false;
+function end(v){if(!fin){fin=true;done(v);}}
+try{
+var yu='https://yandex.ru/images/search?text='+encodeURIComponent(q)+(safeOn?'&family=yes':'');
+var x=new XMLHttpRequest();
+var t=setTimeout(function(){end(null);},9000);
+x.open('GET','https://api.allorigins.win/raw?url='+encodeURIComponent(yu),true);
+x.onreadystatechange=function(){
+if(x.readyState===4){
+clearTimeout(t);
+if(x.status===200||x.status===0){
+var txt=(x.responseText||'').replace(/\\\//g,'/');
+var re=/https:\/\/avatars\.mds\.yandex\.net\/get-images\/[^"'<>\s]+/g;
+var m,out=[],seen={};
+while((m=re.exec(txt))!==null&&out.length<10){
+var u=m[0];
+if(seen[u])continue;
+seen[u]=1;
+out.push({th:u,full:u,go:'https://yandex.ru/images/search?text='+encodeURIComponent(q),cap:'фото'});
+}
+if(out.length){end(out);return;}
+}
+end(null);
+}
+};
+x.send(null);
+}catch(e){end(null);}
+}
+
+/* 5: Pixabay, только с ключом, до 10 */
+function srcPixabay(q,done){
+if(!PIXABAY_KEY){done(null);return;}
+var fin=false;
+function end(v){if(!fin){fin=true;done(v);}}
+try{
+var u='https://pixabay.com/api/?key='+PIXABAY_KEY+'&q='+encodeURIComponent(q)+
+'&image_type=photo&per_page=10'+(safeOn?'&safesearch=true':'');
+var x=new XMLHttpRequest();
+var t=setTimeout(function(){end(null);},8000);
+x.open('GET',u,true);
+x.onreadystatechange=function(){
+if(x.readyState===4){
+clearTimeout(t);
+if(x.status===200||x.status===0){
+try{
+var r=eval('('+x.responseText+')');
+var out=[];
+if(r&&r.hits){
+for(var i=0;i<r.hits.length;i++){
+var it=r.hits[i];
+if(!it||!it.previewURL)continue;
+out.push({th:it.previewURL,full:it.webformatURL||it.previewURL,go:it.pageURL||it.webformatURL,cap:short(it.tags||'pixabay')});
+if(out.length>=10)break;
+}
+}
+end(out);return;
+}catch(e){}
+}
+end(null);
+}
+};
+x.send(null);
+}catch(e){end(null);}
+}
+
+/* 6: Flickr без ключа — JSONP, до 10 */
+function srcFlickr(q,done){
+var fin=false;
+function end(v){if(!fin){fin=true;done(v);}}
+var cb='cbFlickr'+(++flickrSeq)+'_'+prevReqId;
+function cleanup(){
+try{delete window[cb];}catch(e){try{window[cb]=undefined;}catch(e2){}}
+var s=document.getElementById(cb);
+if(s&&s.parentNode)s.parentNode.removeChild(s);
+}
+var t=setTimeout(function(){cleanup();end(null);},8000);
+window[cb]=function(r){
+clearTimeout(t);
+var out=[];
+try{
+if(r&&r.items){
+for(var i=0;i<r.items.length;i++){
+var it=r.items[i];
+if(!it||!it.media||!it.media.m)continue;
+if(safeOn&&BAD.test(it.title||''))continue;
+out.push({th:it.media.m,full:it.media.m.replace('_m.','_b.'),go:it.link||it.media.m,cap:short(it.title||'flickr')});
+if(out.length>=10)break;
+}
+}
+}catch(e){}
+cleanup();
+end(out);
+};
+try{
+var sc=document.createElement('script');
+sc.id=cb;
+sc.src='https://api.flickr.com/services/feeds/photos_public.gne?format=json&jsoncallback='+cb+
+'&media=photos&tags='+encodeURIComponent(q.replace(/\s+/g,','));
+sc.onerror=function(){clearTimeout(t);cleanup();end(null);};
+document.getElementsByTagName('head')[0].appendChild(sc);
+}catch(e){clearTimeout(t);cleanup();end(null);}
+}
+
+/* 7: Reddit без ключа, до 10; over_18 прячется фильтром */
+function srcReddit(q,done){
+var fin=false;
+function end(v){if(!fin){fin=true;done(v);}}
+try{
+var u='https://www.reddit.com/search.json?q='+encodeURIComponent(q)+'&limit=25&type=link';
+var x=new XMLHttpRequest();
+var t=setTimeout(function(){end(null);},8000);
+x.open('GET',u,true);
+x.onreadystatechange=function(){
+if(x.readyState===4){
+clearTimeout(t);
+if(x.status===200||x.status===0){
+try{
+var r=eval('('+x.responseText+')');
+var out=[];
+if(r&&r.data&&r.data.children){
+for(var i=0;i<r.data.children.length;i++){
+var p=r.data.children[i].data;
+if(!p||!p.url)continue;
+if(!/\.(jpe?g|png|gif|webp)(\?.*)?$/i.test(p.url))continue;
+var adult=!!p.over_18;
+if(safeOn&&(adult||BAD.test(p.title||'')))continue;
+out.push({th:p.url,full:p.url,go:'https://www.reddit.com'+(p.permalink||''),cap:short(p.title||'reddit')});
+if(out.length>=10)break;
+}
+}
+end(out);return;
+}catch(e){}
+}
+end(null);
+}
+};
+x.send(null);
+}catch(e){end(null);}
+}
+
+/* сетка по 8 из пула */
+function renderSlice(){
+VIEWS=[];
+var items=ITEMS.slice(0,shownCount);
+if(items.length===0)return '';
+var h='<div style="max-width:260px;margin:0 auto">';
+h+='<table width="100%" cellpadding="0" cellspacing="2"><tr>';
+for(var i=0;i<items.length;i++){
+var it=items[i];
+var idx=addView(it.full,it.go);
+if(i>0&&i%2===0)h+='</tr><tr>';
+h+='<td align="center" width="50%">'+
+'<a href="'+it.go+'" onclick="openView('+idx+');return false"><img class="th" src="'+it.th+'" width="95%" alt=""/></a>'+
+'<div class="tiny">'+esc(it.cap||'')+'</div></td>';
+}
+if(items.length%2!==0)h+='<td width="50%"></td>';
 h+='</tr></table></div>';
 return h;
 }
@@ -476,7 +782,7 @@ return z(d.getHours())+':'+z(d.getMinutes())+':'+z(d.getSeconds());
 }
 
 function short(s){
-s=s.replace(/^File:/i,'').replace(/\.[a-z0-9]+$/i,'');
+s=String(s).replace(/^File:/i,'').replace(/\.[a-z0-9]+$/i,'');
 if(s.length>12){s=s.substring(0,11)+'...';}
 return s;
 }
@@ -485,9 +791,8 @@ function hl(t,q){
 try{return t.replace(new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'),'<b>$1</b>');}catch(e){return t;}
 }
 
-function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
-/* старт */
 updSafe();
 prefetchDB();
 //]]>
