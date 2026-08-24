@@ -1,183 +1,436 @@
-<!DOCTYPE html>
-<html>
+<!DOCTYPE html PUBLIC "-//WAPFORUM//DTD XHTML Mobile 1.0//EN" "http://www.wapforum.org/DTD/xhtml-mobile10.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>S60Tok</title>
-  <style>
-    * { margin:0; padding:0; box-sizing:border-box; }
-    html, body {
-      height:100%;
-      background:#000;
-      color:#fff;
-      font-family: Arial, sans-serif;
-      overflow:hidden;
-    }
-    #container {
-      display:flex;
-      flex-direction:column;
-      height:100%;
-      max-width:100%;
-    }
-    #header {
-      background:#1a1a2e;
-      padding:4px 0;        /* уменьшили */
-      text-align:center;
-      font-size:16px;       /* уменьшили */
-      font-weight:bold;
-      border-bottom:2px solid #333;
-      flex-shrink:0;
-    }
-    #main {
-      flex:1;
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      justify-content:center;
-      position:relative;
-      overflow:hidden;
-    }
-    #photo-container {
-      width:100%;
-      height:100%;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      background:#111;
-    }
-    #photo-container img {
-      max-width:100%;
-      max-height:100%;
-      object-fit:contain;
-      display:block;
-    }
-    #info {
-      position:absolute;
-      bottom:0;
-      left:0;
-      right:0;
-      background:rgba(0,0,0,0.7);
-      padding:4px 8px;      /* уменьшили */
-      font-size:12px;       /* уменьшили */
-      text-align:center;
-      border-top:1px solid #333;
-    }
-    #info span {
-      color:#fff;
-      font-weight:bold;
-    }
-    #controls {
-      display:flex;
-      justify-content:space-between;
-      padding:4px 8px;      /* уменьшили */
-      background:#1a1a2e;
-      border-top:1px solid #333;
-      flex-shrink:0;
-      align-items:center;
-    }
-    #controls button {
-      background:#2a2a4a;
-      color:#fff;
-      border:1px solid #555;
-      border-radius:3px;
-      padding:4px 10px;      /* маленькие кнопки */
-      font-size:12px;        /* мелкий шрифт */
-      cursor:pointer;
-      min-width:50px;        /* уже */
-      height:28px;           /* фиксированная высота */
-    }
-    #controls button:active {
-      background:#3a3a6a;
-    }
-    #counter {
-      font-size:12px;
-      padding:0 4px;
-      color:#ccc;
-    }
-    /* Для экранов 128x160 - ещё мельче */
-    @media (max-width: 160px) {
-      #header { font-size:13px; padding:3px 0; }
-      #controls button { font-size:10px; padding:2px 6px; min-width:40px; height:22px; }
-      #counter { font-size:10px; }
-      #info { font-size:10px; padding:2px 6px; }
-    }
-  </style>
+<meta http-equiv="Content-Type" content="application/vnd.wap.xhtml+xml; charset=utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>CloudBox</title>
+<style>
+body{background:#111;color:#ddd;font-family:Arial,sans-serif;font-size:small;margin:2px;padding:2px}
+a{color:#8ab4f8;text-decoration:underline}
+a:visited{color:#c58af9}
+h1{text-align:center;font-size:large;margin:8px 0 4px 0;color:#fff;font-weight:bold}
+.center{text-align:center}
+input[type=text]{width:90%;font-size:medium;background:#222;color:#fff;border:1px solid #555;padding:3px}
+button{background:#333;color:#fff;border:1px solid #555;padding:4px 10px;font-size:small;margin:2px}
+.url{color:#6fbc6f;font-size:x-small}
+.desc{color:#aaa;font-size:x-small;margin-bottom:6px}
+.title{font-size:small;font-weight:bold}
+.meta{font-size:xx-small;color:#777;margin-bottom:6px}
+hr{border:0;border-top:1px solid #333;margin:6px 0}
+.footer{text-align:center;font-size:xx-small;color:#555;margin-top:10px}
+.nav a{margin:0 4px;font-size:x-small;color:#999}
+/* Компактная шапка результатов */
+.rhead{padding:2px 0;border-bottom:1px solid #333;margin-bottom:6px}
+.rlogo{color:#fff;font-weight:bold;font-size:x-small;white-space:nowrap;margin-right:4px}
+.rform input{width:55%;font-size:x-small;padding:2px 4px;background:#222;color:#fff;border:1px solid #555}
+.rform button{padding:2px 6px;font-size:xx-small}
+/* Поиск картинок — как на главной */
+.engc{margin:6px 0 2px 0;text-align:center}
+.engc label{margin:0 4px;white-space:nowrap;color:#bbb;font-size:x-small}
+.engc input{vertical-align:middle;margin:0 2px 0 0}
+.tiny{font-size:xx-small;color:#777}
+img.th{border:1px solid #444;background:#000}
+</style>
 </head>
 <body>
-<div id="container">
-  <div id="header">S60Tok</div>
-  <div id="main">
-    <div id="photo-container">
-      <img id="photo" src="" alt="фото">
-    </div>
-    <div id="info"><span id="label">User</span> <span id="name"></span></div>
-  </div>
-  <div id="controls">
-    <button id="prevBtn">Назад</button>
-    <div id="counter">1 / 1</div>
-    <button id="nextBtn">Вперёд</button>
-  </div>
+
+<!-- ===== ГЛАВНАЯ ===== -->
+<div id="p1">
+<h1>CloudBox</h1>
+<div class="center" style="font-size:x-small;color:#888;margin-bottom:8px">Приватный поиск</div>
+
+<form onsubmit="return srch()">
+<div class="center">
+<input type="text" id="q" name="q"/><br/>
+<button type="submit">Поиск</button>
+</div>
+</form>
+
+<hr/>
+<div class="nav center">
+<a href="#" onclick="openImg();return false">Картинки</a>|<a href="#">Новости</a>
+</div>
+<div class="footer">&copy; 2026 CloudBox<br/>Mobile Edition</div>
 </div>
 
-<script src="images.js"></script>
+<!-- ===== РЕЗУЛЬТАТЫ WEB ===== -->
+<div id="p2" style="display:none">
+<div class="rhead">
+<table width="100%" cellpadding="0" cellspacing="0"><tr>
+<td><span class="rlogo">CloudBox</span></td>
+<td align="right" class="rform">
+<form onsubmit="return srch2()">
+<input type="text" id="q2"/>
+<button type="submit">OK</button>
+</form>
+</td>
+</tr></table>
+</div>
+<div id="res"></div>
+<hr/>
+<div class="nav center">
+<a href="#" onclick="openImg();return false">Картинки</a>|<a href="#" onclick="bk();return false">&laquo; Назад</a>
+</div>
+<div class="footer">&copy; 2026 CloudBox</div>
+</div>
+
+<!-- ===== ПОИСК КАРТИНОК (в стиле главной) ===== -->
+<div id="p3" style="display:none">
+<h1>CloudBox::Картинки</h1>
+<div class="center" style="font-size:x-small;color:#888;margin-bottom:8px">Приватные картинки</div>
+
+<form onsubmit="return isrch()">
+<div class="center">
+<input type="text" id="iq"/><br/>
+<button type="submit">Найти картинки</button><br/>
+<span class="tiny"><a href="#" onclick="tEng();return false">[поисковики: <span id="engcnt">0</span>]</a></span>
+<div id="engs" class="engc" style="display:none"></div>
+<div id="engx" class="center tiny" style="display:none;margin-bottom:4px">
+<a href="#" onclick="allEng(1);return false">[все]</a>
+<a href="#" onclick="allEng(0);return false">[никто]</a>
+</div>
+</div>
+</form>
+
+<hr/>
+<div id="ires"></div>
+<div class="nav center">
+<a href="#" onclick="hm();return false">&laquo; На главную</a>
+</div>
+<div class="footer">&copy; 2026 CloudBox<br/>Images Edition</div>
+</div>
+
 <script>
-  // Весь JS тот же, без изменений
-  (function() {
-    if (typeof imageList === 'undefined' || !Array.isArray(imageList) || imageList.length === 0) {
-      document.getElementById('photo').alt = 'Нет фото';
-      document.getElementById('name').textContent = 'загрузите фото';
-      document.getElementById('counter').textContent = '0 / 0';
-      return;
-    }
-    function shuffle(arr) {
-      for (var i = arr.length - 1; i > 0; i--) {
-        var j = Math.floor(Math.random() * (i + 1));
-        var temp = arr[i];
-        arr[i] = arr[j];
-        arr[j] = temp;
-      }
-      return arr;
-    }
-    var shuffled = shuffle(imageList.slice());
-    var currentIndex = 0;
-    var total = shuffled.length;
-    var photoEl = document.getElementById('photo');
-    var nameEl = document.getElementById('name');
-    var counterEl = document.getElementById('counter');
-    function updatePhoto(index) {
-      var path = shuffled[index];
-      photoEl.src = path;
-      photoEl.alt = path.split('/').pop();
-      var name = path.split('/').pop().replace(/\.[^/.]+$/, '') || 'фото';
-      nameEl.textContent = name;
-      counterEl.textContent = (index + 1) + ' / ' + total;
-    }
-    function nextPhoto() {
-      currentIndex = (currentIndex + 1) % total;
-      updatePhoto(currentIndex);
-    }
-    function prevPhoto() {
-      currentIndex = (currentIndex - 1 + total) % total;
-      updatePhoto(currentIndex);
-    }
-    document.getElementById('nextBtn').addEventListener('click', nextPhoto);
-    document.getElementById('prevBtn').addEventListener('click', prevPhoto);
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
-        e.preventDefault();
-        nextPhoto();
-      } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
-        e.preventDefault();
-        prevPhoto();
-      }
-    });
-    document.getElementById('photo-container').addEventListener('click', function(e) {
-      if (!e.target.closest('#controls')) {
-        nextPhoto();
-      }
-    });
-    updatePhoto(0);
-  })();
+//<![CDATA[
+var D=[];
+var loaded=false;
+
+/* ===== БАЗА: берётся с GitHub (raw.githubusercontent.com шлёт
+   Access-Control-Allow-Origin: *, поэтому работает откуда угодно) ===== */
+var DB_URL='https://raw.githubusercontent.com/hz405066-byte/S60Tok/refs/heads/main/db.json';
+
+function parseDB(txt){
+if(!txt)return false;
+try{
+var r=eval('('+txt+')');
+if(r&&r.length!==undefined&&r.length>0){D=r;loaded=true;return true;}
+}catch(e){}
+return false;
+}
+
+function fetchSync(u){
+try{
+var x=new XMLHttpRequest();
+x.open('GET',u,false);
+x.send(null);
+if(x.status===200||x.status===0){return x.responseText;}
+}catch(e){}
+return '';
+}
+
+function loadDB(){
+if(loaded)return;
+if(parseDB(fetchSync(DB_URL)))return;      /* 1) GitHub */
+if(parseDB(fetchSync('db.json')))return;   /* 2) локальный файл */
+D=[                                        /* 3) встроенный минимум */
+{t:"CloudBox Mail",u:"mail.cloudbox.net",d:"Зашифрованная почта.",k:"почта mail"},
+{t:"Java Games",u:"jgames.cb.net",d:"Java игры бесплатно.",k:"игры java jar"},
+{t:"Погода",u:"wthr.cb.net",d:"Прогноз погоды.",k:"погода прогноз"}
+];
+loaded=true;
+}
+
+/* предзагрузка базы с GitHub при старте страницы,
+   чтобы первый поиск не ждал сеть */
+function prefetchDB(){
+if(loaded)return;
+try{
+var x=new XMLHttpRequest();
+x.open('GET',DB_URL,true);
+x.onreadystatechange=function(){
+if(x.readyState===4&&(x.status===200||x.status===0)){
+parseDB(x.responseText);
+}
+};
+x.send(null);
+}catch(e){}
+}
+
+/* ===== СПИСОК КАРТИНОЧНЫХ ПОИСКОВИКОВ (без Google и Яндекс) =====
+   [название, шаблон URL с {q}, галочка по умолчанию] */
+var IMGEN=[
+['DuckDuckGo','https://duckduckgo.com/?q={q}&iax=images&ia=i',1],
+['Bing','https://www.bing.com/images/search?q={q}',1],
+['Qwant','https://www.qwant.com/images?q={q}',1],
+['Ecosia','https://www.ecosia.org/images?q={q}',1],
+['Brave','https://search.brave.com/search?q={q}&source=images',0],
+['Startpage','https://www.startpage.com/search?query={q}&cat=images',0],
+['Swisscows','https://swisscows.com/images?query={q}',0],
+['Yahoo','https://images.search.yahoo.com/search/images?p={q}',0],
+['Openverse','https://openverse.org/search/image?q={q}',0]
+];
+
+function srch(){
+loadDB();
+var q=document.getElementById('q').value;
+if(!q||!q.replace(/\s/g,''))return false;
+go(q);
+return false;
+}
+
+function srch2(){
+loadDB();
+var q=document.getElementById('q2').value;
+if(!q||!q.replace(/\s/g,''))return false;
+go(q);
+return false;
+}
+
+function go(q){
+var ql=q.toLowerCase();
+var f=[];
+for(var i=0;i<D.length;i++){
+if(D[i].t.toLowerCase().indexOf(ql)>-1||D[i].d.toLowerCase().indexOf(ql)>-1||D[i].k.toLowerCase().indexOf(ql)>-1){
+f.push(D[i]);
+}}
+document.getElementById('q2').value=q;
+var h='<div class="meta">Результаты 1-'+f.length+' из '+f.length+' &laquo;'+esc(q)+'&raquo;</div>';
+if(f.length===0){
+h+='<div style="padding:8px;color:#aaa">Ничего не найдено.<br/><small>Проверьте запрос.</small></div>';
+}else{
+for(var j=0;j<f.length;j++){
+h+='<div style="margin-bottom:10px;padding-left:6px;border-left:2px solid #444">'+
+'<div class="title"><a href="http://'+f[j].u+'">'+hl(f[j].t,q)+'</a></div>'+
+'<div class="url">'+f[j].u+'</div>'+
+'<div class="desc">'+hl(f[j].d,q)+'</div></div>';
+}}
+document.getElementById('res').innerHTML=h;
+document.getElementById('p1').style.display='none';
+document.getElementById('p2').style.display='block';
+document.getElementById('p3').style.display='none';
+window.scrollTo(0,0);
+}
+
+function lk(){
+loadDB();
+var q=document.getElementById('q').value;
+if(!q||!q.replace(/\s/g,'')){alert('Введите запрос');return;}
+var r=D[Math.floor(Math.random()*D.length)];
+alert('Мне повезло!\n'+r.t+'\nhttp://'+r.u);
+}
+
+function bk(){
+document.getElementById('p2').style.display='none';
+document.getElementById('p3').style.display='none';
+document.getElementById('p1').style.display='block';
+document.getElementById('q').value='';
+document.title='CloudBox';
+document.getElementById('q').focus();
+}
+
+/* ===== НАВИГАЦИЯ / КАРТИНКИ ===== */
+function hm(){
+document.getElementById('p2').style.display='none';
+document.getElementById('p3').style.display='none';
+document.getElementById('p1').style.display='block';
+document.title='CloudBox';
+window.scrollTo(0,0);
+}
+
+function openImg(){
+document.getElementById('p1').style.display='none';
+document.getElementById('p2').style.display='none';
+document.getElementById('p3').style.display='block';
+var el=document.getElementById('iq');
+var q=document.getElementById('q').value||document.getElementById('q2').value;
+if(q)el.value=q;
+/* живой поиск: превью обновляется прямо при наборе */
+el.oninput=iqLive;
+el.onkeyup=iqLive;
+buildEng();
+/* превью стартует СРАЗУ, если запрос уже есть */
+var q0=el.value.replace(/^\s+|\s+$/g,'');
+if(q0){showImgs(q0);}else{document.getElementById('ires').innerHTML='';}
+window.scrollTo(0,0);
+try{el.focus();}catch(e){}
+}
+
+/* ===== ВЫБОР ПОИСКОВИКОВ (скрытый) ===== */
+function buildEng(){
+var box=document.getElementById('engs');
+if(box.getElementsByTagName('input').length!==IMGEN.length){
+var h='';
+for(var i=0;i<IMGEN.length;i++){
+h+='<label><input type="checkbox" value="'+i+'" onclick="updCnt()"'+(IMGEN[i][2]?' checked="checked"':'')+' />'+IMGEN[i][0]+'</label>';
+}
+box.innerHTML=h;
+}
+updCnt();
+}
+
+function tEng(){
+var b=document.getElementById('engs');
+var x=document.getElementById('engx');
+var v=(b.style.display==='none')?'block':'none';
+b.style.display=v;
+x.style.display=v;
+}
+
+function allEng(v){
+var c=document.getElementById('engs').getElementsByTagName('input');
+for(var i=0;i<c.length;i++){c[i].checked=!!v;}
+updCnt();
+}
+
+function updCnt(){
+var c=document.getElementById('engs').getElementsByTagName('input');
+var n=0;
+for(var i=0;i<c.length;i++){if(c[i].checked)n++;}
+document.getElementById('engcnt').innerHTML=''+n;
+}
+
+/* ===== КАРТИНКИ: Commons ВСЕГДА; при загрузке превью сайт обновляется ===== */
+var lastQ='';
+var lastSel=[];
+var prevReqId=0;
+var imgTimer=null;
+
+function iqLive(){
+if(imgTimer)clearTimeout(imgTimer);
+imgTimer=setTimeout(function(){
+var q=document.getElementById('iq').value.replace(/^\s+|\s+$/g,'');
+if(q)showImgs(q);
+},700);
+}
+
+function isrch(){
+var q=document.getElementById('iq').value.replace(/^\s+|\s+$/g,'');
+if(!q){return false;}
+showImgs(q);
+return false;
+}
+
+function showImgs(q){
+lastQ=q;
+var c=document.getElementById('engs').getElementsByTagName('input');
+lastSel=[];
+for(var i=0;i<c.length;i++){if(c[i].checked){lastSel.push(IMGEN[c[i].value]);}}
+drawIres(q,'<div class="desc">Загрузка превью&hellip;</div>','');
+cprev(q);
+window.scrollTo(0,0);
+}
+
+/* полная перерисовка блока результатов */
+function drawIres(q,prevHtml,stamp){
+var eq=encodeURIComponent(q);
+var h='<div class="meta">Картинки &laquo;'+esc(q)+'&raquo;';
+if(stamp)h+=' <span class="tiny">&middot; обновлено '+stamp+'</span>';
+h+='</div><div id="cprev">'+prevHtml+'</div>';
+if(lastSel.length>0){
+h+='<div class="tiny center" style="margin-top:6px">Также искать:';
+for(var j=0;j<lastSel.length;j++){
+h+=' <a href="'+lastSel[j][1].replace('{q}',eq)+'">'+lastSel[j][0]+'</a>';
+if(j<lastSel.length-1)h+=' &middot;';
+}
+h+='</div>';
+}
+document.getElementById('ires').innerHTML=h;
+}
+
+function retryPrev(){
+if(!lastQ)return;
+drawIres(lastQ,'<div class="desc">Загрузка превью&hellip;</div>','');
+cprev(lastQ);
+}
+
+/* Превью: CORS-открытый API Wikimedia Commons (origin=*).
+   Таймаут 12 сек + обрыв старого запроса, при сбое — [повторить]. */
+function cprev(q){
+var id=++prevReqId;
+var eq=encodeURIComponent(q);
+var u='https://commons.wikimedia.org/w/api.php?action=query&format=json&origin=*'+
+'&generator=search&gsrnamespace=6&gsrlimit=8&gsrsearch='+eq+
+'&prop=imageinfo&iiprop=url|thumburl&iiurlwidth=160';
+try{
+var x=new XMLHttpRequest();
+var t=setTimeout(function(){
+if(id===prevReqId){try{x.abort();}catch(e){}prevFail(q);}
+},12000);
+x.open('GET',u,true);
+x.onreadystatechange=function(){
+if(x.readyState===4){
+clearTimeout(t);
+if(id!==prevReqId)return;
+if(x.status===200||x.status===0){
+try{
+var g=buildGrid(eval('('+x.responseText+')'));
+if(g){
+/* превью приехало — обновляем сайт */
+document.title='CloudBox::Картинки: '+q;
+drawIres(q,g,tm());
+return;
+}
+}catch(e){}
+}
+prevFail(q);
+}
+};
+x.send(null);
+}catch(e){if(id===prevReqId)prevFail(q);}
+}
+
+function prevFail(q){
+drawIres(q,'<div class="desc">Превью не загрузилось. '+
+'<a href="#" onclick="retryPrev();return false">[повторить]</a> &middot; '+
+'<a href="https://commons.wikimedia.org/w/index.php?search='+encodeURIComponent(q)+'">[открыть Commons]</a></div>','');
+}
+
+/* сетка ПОПОЛАМ: 2 в ряд */
+function buildGrid(r){
+if(!r||!r.query||!r.query.pages)return '';
+var p=r.query.pages;
+var h='<div class="desc">Wikimedia Commons:</div>';
+h+='<div style="max-width:260px;margin:0 auto">';
+h+='<table width="100%" cellpadding="0" cellspacing="2"><tr>';
+var n=0;
+for(var k in p){
+if(!p[k].imageinfo)continue;
+var ii=p[k].imageinfo[0];
+if(n>0&&n%2===0)h+='</tr><tr>';
+h+='<td align="center" width="50%">'+
+'<a href="'+ii.descriptionurl+'"><img class="th" src="'+ii.thumburl+'" width="95%" alt=""/></a>'+
+'<div class="tiny">'+esc(short(p[k].title||''))+'</div></td>';
+n++;
+}
+if(n===0)return '';
+while(n%2!==0){h+='<td width="50%"></td>';n++;}
+h+='</tr></table></div>';
+return h;
+}
+
+/* время для штампа "обновлено" */
+function tm(){
+var d=new Date();
+function z(v){return (v<10?'0':'')+v;}
+return z(d.getHours())+':'+z(d.getMinutes())+':'+z(d.getSeconds());
+}
+
+/* короткая подпись: убрать "File:" и расширение, обрезать */
+function short(s){
+s=s.replace(/^File:/i,'').replace(/\.[a-z0-9]+$/i,'');
+if(s.length>12){s=s.substring(0,11)+'...';}
+return s;
+}
+
+function hl(t,q){
+try{return t.replace(new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'),'<b>$1</b>');}catch(e){return t;}
+}
+
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+/* старт: предзагрузка базы с GitHub */
+prefetchDB();
+//]]>
 </script>
 </body>
 </html>
