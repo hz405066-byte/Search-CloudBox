@@ -4,6 +4,7 @@
 <meta http-equiv="Content-Type" content="application/vnd.wap.xhtml+xml; charset=utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>CloudBox</title>
+<link rel="icon" href="favicon.ico"/>
 <style>
 body{background:#111;color:#ddd;font-family:Arial,sans-serif;font-size:small;margin:2px;padding:2px}
 a{color:#8ab4f8;text-decoration:underline}
@@ -112,11 +113,10 @@ img.th{border:1px solid #444;background:#000}
 var D=[];
 var loaded=false;
 
-/* ===== БАЗА: берётся с GitHub ===== */
+/* ===== БАЗА: берётся с GitHub (новый репозиторий, там есть записи с "a":1) ===== */
 var DB_URL='https://raw.githubusercontent.com/hz405066-byte/Search-CloudBox/refs/heads/main/db.json';
-/* Парсер базы: понимает и старый формат с [ ], и новый — просто строки,
-   по одному объекту на строку, без запятых. Копировать стало легко:
-   дописал строки в конец файла — и всё. */
+
+/* Парсер базы: понимает и старый формат с [ ], и новый — просто строки */
 function parseDB(txt){
 if(!txt)return false;
 var r=null;
@@ -150,9 +150,9 @@ return '';
 
 function loadDB(){
 if(loaded)return;
-if(parseDB(fetchSync(DB_URL)))return;      /* 1) GitHub */
-if(parseDB(fetchSync('db.json')))return;   /* 2) локальный файл */
-D=[                                        /* 3) встроенный минимум */
+if(parseDB(fetchSync(DB_URL)))return;
+if(parseDB(fetchSync('db.json')))return;
+D=[
 {t:"CloudBox Mail",u:"mail.cloudbox.net",d:"Зашифрованная почта.",k:"почта mail"},
 {t:"Java Games",u:"jgames.cb.net",d:"Java игры бесплатно.",k:"игры java jar"},
 {t:"Погода",u:"wthr.cb.net",d:"Прогноз погоды.",k:"погода прогноз"}
@@ -174,8 +174,7 @@ x.send(null);
 }catch(e){}
 }
 
-/* ===== СПИСОК КАРТИНОЧНЫХ ПОИСКОВИКОВ (без Google и Яндекс) =====
-   [название, шаблон URL с {q}, галочка, суффикс фильтр ВКЛ, суффикс фильтр ВЫКЛ] */
+/* ===== СПИСОК КАРТИНОЧНЫХ ПОИСКОВИКОВ (без Google и Яндекс) ===== */
 var IMGEN=[
 ['DuckDuckGo','https://duckduckgo.com/?q={q}&iax=images&ia=i',1,'&kp=1','&kp=-1'],
 ['Bing','https://www.bing.com/images/search?q={q}',1,'&adlt=strict','&adlt=off'],
@@ -188,10 +187,11 @@ var IMGEN=[
 ['Openverse','https://openverse.org/search/image?q={q}',0,'','']
 ];
 
-/* ===== ФИЛЬТР 18+ (вкл = детский режим); работает и на веб, и на картинки ===== */
+/* ===== ФИЛЬТР 18+ ===== */
 var safeOn=1;
 var BAD=/\b(porn|porno|nude|nudity|nsfw|erotic|erotica|hentai|fetish|topless|genitals?|vagina|penis|breasts?|boobs|xxx|sex)\b/i;
 var lastWebQ='';
+var hidImg=0;
 
 function updSafe(){
 var v=safeOn?'вкл':'выкл';
@@ -228,14 +228,18 @@ function go(q){
 lastWebQ=q;
 var ql=q.toLowerCase();
 var f=[];
+var hid=0;
 for(var i=0;i<D.length;i++){
-if(safeOn&&isAdult(D[i]))continue;
-if(D[i].t.toLowerCase().indexOf(ql)>-1||D[i].d.toLowerCase().indexOf(ql)>-1||D[i].k.toLowerCase().indexOf(ql)>-1){
+var m=(D[i].t.toLowerCase().indexOf(ql)>-1||D[i].d.toLowerCase().indexOf(ql)>-1||D[i].k.toLowerCase().indexOf(ql)>-1);
+if(!m)continue;
+if(safeOn&&isAdult(D[i])){hid++;continue;}
 f.push(D[i]);
-}}
+}
 document.getElementById('q2').value=q;
 var h='<div class="meta">Результаты 1-'+f.length+' из '+f.length+' &laquo;'+esc(q)+
-'&raquo; <span class="tiny">&middot; фильтр '+(safeOn?'вкл':'выкл')+'</span></div>';
+'&raquo; <span class="tiny">&middot; фильтр '+(safeOn?'вкл':'выкл');
+if(hid>0)h+=' &middot; скрыто фильтром: '+hid;
+h+='</span></div>';
 if(f.length===0){
 h+='<div style="padding:8px;color:#aaa">Ничего не найдено.<br/><small>Проверьте запрос.</small></div>';
 }else{
@@ -328,7 +332,7 @@ for(var i=0;i<c.length;i++){if(c[i].checked)n++;}
 document.getElementById('engcnt').innerHTML=''+n;
 }
 
-/* ===== КАРТИНКИ: Commons ВСЕГДА; при загрузке превью сайт обновляется ===== */
+/* ===== КАРТИНКИ ===== */
 var lastQ='';
 var lastSel=[];
 var prevReqId=0;
@@ -351,6 +355,7 @@ return false;
 
 function showImgs(q){
 lastQ=q;
+hidImg=0;
 var c=document.getElementById('engs').getElementsByTagName('input');
 lastSel=[];
 for(var i=0;i<c.length;i++){if(c[i].checked){lastSel.push(IMGEN[c[i].value]);}}
@@ -363,6 +368,7 @@ function drawIres(q,prevHtml,stamp){
 var eq=encodeURIComponent(q);
 var h='<div class="meta">Картинки &laquo;'+esc(q)+'&raquo;'+
 ' <span class="tiny">&middot; фильтр '+(safeOn?'вкл':'выкл');
+if(hidImg>0)h+=' &middot; скрыто фильтром: '+hidImg;
 if(stamp)h+=' &middot; обновлено '+stamp;
 h+='</span></div><div id="cprev">'+prevHtml+'</div>';
 if(lastSel.length>0){
@@ -425,6 +431,7 @@ drawIres(q,'<div class="desc">Превью не загрузилось. '+
 function buildGrid(r){
 if(!r||!r.query||!r.query.pages)return '';
 var p=r.query.pages;
+var hid=0;
 var h='<div class="desc">Wikimedia Commons:</div>';
 h+='<div style="max-width:260px;margin:0 auto">';
 h+='<table width="100%" cellpadding="0" cellspacing="2"><tr>';
@@ -432,7 +439,7 @@ var n=0;
 for(var k in p){
 if(!p[k].imageinfo)continue;
 var title=p[k].title||'';
-if(safeOn&&BAD.test(title))continue;
+if(safeOn&&BAD.test(title)){hid++;continue;}
 var ii=p[k].imageinfo[0];
 if(n>0&&n%2===0)h+='</tr><tr>';
 h+='<td align="center" width="50%">'+
@@ -440,6 +447,7 @@ h+='<td align="center" width="50%">'+
 '<div class="tiny">'+esc(short(title))+'</div></td>';
 n++;
 }
+hidImg=hid;
 if(n===0)return '';
 while(n%2!==0){h+='<td width="50%"></td>';n++;}
 h+='</tr></table></div>';
