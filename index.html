@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="application/vnd.wap.xhtml+xml; charset=utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>CloudBox</title>
+<title>CloudBox | Спец Поиск для кнопочных телефонов</title>
 <link rel="icon" href="favicon.ico"/>
 <style>
 body{background:#111;color:#ddd;font-family:Arial,sans-serif;font-size:small;margin:2px;padding:2px}
@@ -25,7 +25,12 @@ hr{border:0;border-top:1px solid #333;margin:6px 0}
 .rlogo{color:#fff;font-weight:bold;font-size:x-small;white-space:nowrap;margin-right:4px}
 .rform input{width:55%;font-size:x-small;padding:2px 4px;background:#222;color:#fff;border:1px solid #555}
 .rform button{padding:2px 6px;font-size:xx-small}
-/* Поиск картинок — как на главной */
+/* Вкладки как в Google: активная — светлее и с синей полоской сверху */
+.tabs{margin:6px 0 8px 0;padding:0 2px 4px 2px;border-bottom:1px solid #333;font-size:x-small}
+.tabs a{display:inline-block;padding:3px 9px;margin-right:4px;border:1px solid #444;border-bottom:none;background:#191919;color:#8ab4f8;text-decoration:none;border-radius:4px 4px 0 0}
+.tabs b{display:inline-block;padding:3px 9px;margin-right:4px;border:1px solid #555;border-bottom:none;border-top:2px solid #8ab4f8;background:#333;color:#fff;border-radius:4px 4px 0 0}
+.tabs a.tiny{display:inline;padding:0;margin-left:6px;border:none;background:none;color:#777;border-radius:0}
+/* Поиск картинок */
 .engc{margin:6px 0 2px 0;text-align:center}
 .engc label{margin:0 4px;white-space:nowrap;color:#bbb;font-size:x-small}
 .engc input{vertical-align:middle;margin:0 2px 0 0}
@@ -58,11 +63,11 @@ img.th{border:1px solid #444;background:#000}
 <div class="footer">&copy; 2026 CloudBox<br/>Mobile Edition</div>
 </div>
 
-<!-- ===== РЕЗУЛЬТАТЫ WEB ===== -->
+<!-- ===== РЕЗУЛЬТАТЫ WEB (с вкладками) ===== -->
 <div id="p2" style="display:none">
 <div class="rhead">
 <table width="100%" cellpadding="0" cellspacing="0"><tr>
-<td><span class="rlogo">CloudBox</span></td>
+<td><span class="rlogo">CloudBox::Результат</span></td>
 <td align="right" class="rform">
 <form onsubmit="return srch2()">
 <input type="text" id="q2"/>
@@ -71,37 +76,36 @@ img.th{border:1px solid #444;background:#000}
 </td>
 </tr></table>
 </div>
+<div class="tabs"><b>Результат</b><a href="#" onclick="toImg();return false">Картинки</a></div>
 <div id="res"></div>
 <hr/>
 <div class="nav center">
-<a href="#" onclick="openImg();return false">Картинки</a>|<a href="#" onclick="bk();return false">&laquo; Назад</a>
+<a href="#" onclick="bk();return false">&laquo; На главную</a>
 </div>
 <div class="footer">&copy; 2026 CloudBox</div>
 </div>
 
-<!-- ===== ПОИСК КАРТИНОК (в стиле главной) ===== -->
+<!-- ===== КАРТИНКИ (дизайн как у результатов, с вкладками) ===== -->
 <div id="p3" style="display:none">
-<h1>CloudBox::Картинки</h1>
-<div class="center" style="font-size:x-small;color:#888;margin-bottom:8px">Приватные картинки</div>
-
+<div class="rhead">
+<table width="100%" cellpadding="0" cellspacing="0"><tr>
+<td><span class="rlogo">CloudBox::Картинки</span></td>
+<td align="right" class="rform">
 <form onsubmit="return isrch()">
-<div class="center">
-<input type="text" id="iq"/><br/>
-<button type="submit">Найти картинки</button><br/>
-<span class="tiny">
-<a href="#" onclick="tSafe();return false">[фильтр 18+: <span id="safest3">вкл</span>]</a>
-<a href="#" onclick="tEng();return false">[поисковики: <span id="engcnt">0</span>]</a>
-</span>
+<input type="text" id="iq"/>
+<button type="submit">OK</button>
+</form>
+</td>
+</tr></table>
+</div>
+<div class="tabs"><a href="#" onclick="toWeb();return false">Результат</a><b>Картинки</b><a href="#" onclick="tEng();return false" class="tiny">[поисковики: <span id="engcnt">0</span>]</a></div>
 <div id="engs" class="engc" style="display:none"></div>
 <div id="engx" class="center tiny" style="display:none;margin-bottom:4px">
 <a href="#" onclick="allEng(1);return false">[все]</a>
 <a href="#" onclick="allEng(0);return false">[никто]</a>
 </div>
-</div>
-</form>
-
-<hr/>
 <div id="ires"></div>
+<hr/>
 <div class="nav center">
 <a href="#" onclick="hm();return false">&laquo; На главную</a>
 </div>
@@ -113,10 +117,9 @@ img.th{border:1px solid #444;background:#000}
 var D=[];
 var loaded=false;
 
-/* ===== БАЗА: берётся с GitHub (новый репозиторий, там есть записи с "a":1) ===== */
+/* ===== БАЗА: берётся с GitHub ===== */
 var DB_URL='https://raw.githubusercontent.com/hz405066-byte/Search-CloudBox/refs/heads/main/db.json';
 
-/* Парсер базы: понимает и старый формат с [ ], и новый — просто строки */
 function parseDB(txt){
 if(!txt)return false;
 var r=null;
@@ -187,16 +190,14 @@ var IMGEN=[
 ['Openverse','https://openverse.org/search/image?q={q}',0,'','']
 ];
 
-/* ===== ФИЛЬТР 18+ ===== */
+/* ===== ФИЛЬТР 18+ (переключается ТОЛЬКО на главной) ===== */
 var safeOn=1;
 var BAD=/\b(porn|porno|nude|nudity|nsfw|erotic|erotica|hentai|fetish|topless|genitals?|vagina|penis|breasts?|boobs|xxx|sex)\b/i;
 var lastWebQ='';
-var hidImg=0;
 
 function updSafe(){
-var v=safeOn?'вкл':'выкл';
-var a=document.getElementById('safest1');if(a)a.innerHTML=v;
-var b=document.getElementById('safest3');if(b)b.innerHTML=v;
+var a=document.getElementById('safest1');
+if(a)a.innerHTML=safeOn?'вкл':'выкл';
 }
 
 function tSafe(){
@@ -224,22 +225,37 @@ go(q);
 return false;
 }
 
+/* ===== ВКЛАДКИ: запрос переносится между Результат и Картинки ===== */
+function toImg(){
+var q=document.getElementById('q2').value||lastWebQ;
+document.getElementById('p1').style.display='none';
+document.getElementById('p2').style.display='none';
+document.getElementById('p3').style.display='block';
+document.getElementById('iq').value=q;
+buildEng();
+if(q)showImgs(q);
+window.scrollTo(0,0);
+}
+
+function toWeb(){
+var q=document.getElementById('iq').value||lastQ;
+loadDB();
+document.getElementById('q2').value=q;
+go(q);
+}
+
 function go(q){
 lastWebQ=q;
 var ql=q.toLowerCase();
 var f=[];
-var hid=0;
 for(var i=0;i<D.length;i++){
-var m=(D[i].t.toLowerCase().indexOf(ql)>-1||D[i].d.toLowerCase().indexOf(ql)>-1||D[i].k.toLowerCase().indexOf(ql)>-1);
-if(!m)continue;
-if(safeOn&&isAdult(D[i])){hid++;continue;}
+if(safeOn&&isAdult(D[i]))continue;
+if(D[i].t.toLowerCase().indexOf(ql)>-1||D[i].d.toLowerCase().indexOf(ql)>-1||D[i].k.toLowerCase().indexOf(ql)>-1){
 f.push(D[i]);
-}
+}}
 document.getElementById('q2').value=q;
 var h='<div class="meta">Результаты 1-'+f.length+' из '+f.length+' &laquo;'+esc(q)+
-'&raquo; <span class="tiny">&middot; фильтр '+(safeOn?'вкл':'выкл');
-if(hid>0)h+=' &middot; скрыто фильтром: '+hid;
-h+='</span></div>';
+'&raquo; <span class="tiny">&middot; фильтр '+(safeOn?'вкл':'выкл')+'</span></div>';
 if(f.length===0){
 h+='<div style="padding:8px;color:#aaa">Ничего не найдено.<br/><small>Проверьте запрос.</small></div>';
 }else{
@@ -273,7 +289,6 @@ document.title='CloudBox';
 document.getElementById('q').focus();
 }
 
-/* ===== НАВИГАЦИЯ / КАРТИНКИ ===== */
 function hm(){
 document.getElementById('p2').style.display='none';
 document.getElementById('p3').style.display='none';
@@ -282,6 +297,7 @@ document.title='CloudBox';
 window.scrollTo(0,0);
 }
 
+/* с главной — сразу в картинки */
 function openImg(){
 document.getElementById('p1').style.display='none';
 document.getElementById('p2').style.display='none';
@@ -355,7 +371,9 @@ return false;
 
 function showImgs(q){
 lastQ=q;
-hidImg=0;
+var el=document.getElementById('iq');
+el.oninput=iqLive;
+el.onkeyup=iqLive;
 var c=document.getElementById('engs').getElementsByTagName('input');
 lastSel=[];
 for(var i=0;i<c.length;i++){if(c[i].checked){lastSel.push(IMGEN[c[i].value]);}}
@@ -368,7 +386,6 @@ function drawIres(q,prevHtml,stamp){
 var eq=encodeURIComponent(q);
 var h='<div class="meta">Картинки &laquo;'+esc(q)+'&raquo;'+
 ' <span class="tiny">&middot; фильтр '+(safeOn?'вкл':'выкл');
-if(hidImg>0)h+=' &middot; скрыто фильтром: '+hidImg;
 if(stamp)h+=' &middot; обновлено '+stamp;
 h+='</span></div><div id="cprev">'+prevHtml+'</div>';
 if(lastSel.length>0){
@@ -431,7 +448,6 @@ drawIres(q,'<div class="desc">Превью не загрузилось. '+
 function buildGrid(r){
 if(!r||!r.query||!r.query.pages)return '';
 var p=r.query.pages;
-var hid=0;
 var h='<div class="desc">Wikimedia Commons:</div>';
 h+='<div style="max-width:260px;margin:0 auto">';
 h+='<table width="100%" cellpadding="0" cellspacing="2"><tr>';
@@ -439,7 +455,7 @@ var n=0;
 for(var k in p){
 if(!p[k].imageinfo)continue;
 var title=p[k].title||'';
-if(safeOn&&BAD.test(title)){hid++;continue;}
+if(safeOn&&BAD.test(title))continue;
 var ii=p[k].imageinfo[0];
 if(n>0&&n%2===0)h+='</tr><tr>';
 h+='<td align="center" width="50%">'+
@@ -447,7 +463,6 @@ h+='<td align="center" width="50%">'+
 '<div class="tiny">'+esc(short(title))+'</div></td>';
 n++;
 }
-hidImg=hid;
 if(n===0)return '';
 while(n%2!==0){h+='<td width="50%"></td>';n++;}
 h+='</tr></table></div>';
