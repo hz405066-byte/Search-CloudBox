@@ -46,6 +46,10 @@ img.th{border:1px solid #444;background:#000}
 </div>
 </form>
 
+<div class="center tiny" style="margin-top:4px">
+фильтр: <a href="#" onclick="tSafe();return false">[ <span id="safest1">вкл</span> ]</a>
+</div>
+
 <hr/>
 <div class="nav center">
 <a href="#" onclick="openImg();return false">Картинки</a>|<a href="#">Новости</a>
@@ -83,7 +87,10 @@ img.th{border:1px solid #444;background:#000}
 <div class="center">
 <input type="text" id="iq"/><br/>
 <button type="submit">Найти картинки</button><br/>
-<span class="tiny"><a href="#" onclick="tEng();return false">[поисковики: <span id="engcnt">0</span>]</a></span>
+<span class="tiny">
+<a href="#" onclick="tSafe();return false">[фильтр 18+: <span id="safest3">вкл</span>]</a>
+<a href="#" onclick="tEng();return false">[поисковики: <span id="engcnt">0</span>]</a>
+</span>
 <div id="engs" class="engc" style="display:none"></div>
 <div id="engx" class="center tiny" style="display:none;margin-bottom:4px">
 <a href="#" onclick="allEng(1);return false">[все]</a>
@@ -105,16 +112,30 @@ img.th{border:1px solid #444;background:#000}
 var D=[];
 var loaded=false;
 
-/* ===== БАЗА: берётся с GitHub (raw.githubusercontent.com шлёт
-   Access-Control-Allow-Origin: *, поэтому работает откуда угодно) ===== */
+/* ===== БАЗА: берётся с GitHub ===== */
 var DB_URL='https://raw.githubusercontent.com/hz405066-byte/S60Tok/refs/heads/main/db.json';
 
+/* Парсер базы: понимает и старый формат с [ ], и новый — просто строки,
+   по одному объекту на строку, без запятых. Копировать стало легко:
+   дописал строки в конец файла — и всё. */
 function parseDB(txt){
 if(!txt)return false;
-try{
-var r=eval('('+txt+')');
+var r=null;
+try{r=eval('('+txt+')');}catch(e){r=null;}
 if(r&&r.length!==undefined&&r.length>0){D=r;loaded=true;return true;}
+var lines=String(txt).replace(/\r/g,'').split('\n');
+var out=[];
+for(var i=0;i<lines.length;i++){
+var s=lines[i].replace(/^\s+|\s+$/g,'');
+if(!s||s==='['||s===']')continue;
+s=s.replace(/,\s*$/,'');
+if(!s)continue;
+try{
+var o=eval('('+s+')');
+if(o&&o.t!==undefined&&o.u!==undefined)out.push(o);
 }catch(e){}
+}
+if(out.length>0){D=out;loaded=true;return true;}
 return false;
 }
 
@@ -140,8 +161,6 @@ D=[                                        /* 3) встроенный миним
 loaded=true;
 }
 
-/* предзагрузка базы с GitHub при старте страницы,
-   чтобы первый поиск не ждал сеть */
 function prefetchDB(){
 if(loaded)return;
 try{
@@ -157,18 +176,38 @@ x.send(null);
 }
 
 /* ===== СПИСОК КАРТИНОЧНЫХ ПОИСКОВИКОВ (без Google и Яндекс) =====
-   [название, шаблон URL с {q}, галочка по умолчанию] */
+   [название, шаблон URL с {q}, галочка, суффикс фильтр ВКЛ, суффикс фильтр ВЫКЛ] */
 var IMGEN=[
-['DuckDuckGo','https://duckduckgo.com/?q={q}&iax=images&ia=i',1],
-['Bing','https://www.bing.com/images/search?q={q}',1],
-['Qwant','https://www.qwant.com/images?q={q}',1],
-['Ecosia','https://www.ecosia.org/images?q={q}',1],
-['Brave','https://search.brave.com/search?q={q}&source=images',0],
-['Startpage','https://www.startpage.com/search?query={q}&cat=images',0],
-['Swisscows','https://swisscows.com/images?query={q}',0],
-['Yahoo','https://images.search.yahoo.com/search/images?p={q}',0],
-['Openverse','https://openverse.org/search/image?q={q}',0]
+['DuckDuckGo','https://duckduckgo.com/?q={q}&iax=images&ia=i',1,'&kp=1','&kp=-1'],
+['Bing','https://www.bing.com/images/search?q={q}',1,'&adlt=strict','&adlt=off'],
+['Qwant','https://www.qwant.com/images?q={q}',1,'',''],
+['Ecosia','https://www.ecosia.org/images?q={q}',1,'',''],
+['Brave','https://search.brave.com/search?q={q}&source=images',0,'&safesearch=strict','&safesearch=off'],
+['Startpage','https://www.startpage.com/search?query={q}&cat=images',0,'',''],
+['Swisscows','https://swisscows.com/images?query={q}',0,'',''],
+['Yahoo','https://images.search.yahoo.com/search/images?p={q}',0,'&vm=1','&vm=0'],
+['Openverse','https://openverse.org/search/image?q={q}',0,'','']
 ];
+
+/* ===== ФИЛЬТР 18+ (вкл = детский режим); работает и на веб, и на картинки ===== */
+var safeOn=1;
+var BAD=/\b(porn|porno|nude|nudity|nsfw|erotic|erotica|hentai|fetish|topless|genitals?|vagina|penis|breasts?|boobs|xxx|sex)\b/i;
+var lastWebQ='';
+
+function updSafe(){
+var v=safeOn?'вкл':'выкл';
+var a=document.getElementById('safest1');if(a)a.innerHTML=v;
+var b=document.getElementById('safest3');if(b)b.innerHTML=v;
+}
+
+function tSafe(){
+safeOn=safeOn?0:1;
+updSafe();
+if(document.getElementById('p3').style.display!=='none'&&lastQ){showImgs(lastQ);}
+if(document.getElementById('p2').style.display!=='none'&&lastWebQ){go(lastWebQ);}
+}
+
+function isAdult(e){return !!(e.a||e.adult);}
 
 function srch(){
 loadDB();
@@ -187,14 +226,17 @@ return false;
 }
 
 function go(q){
+lastWebQ=q;
 var ql=q.toLowerCase();
 var f=[];
 for(var i=0;i<D.length;i++){
+if(safeOn&&isAdult(D[i]))continue;
 if(D[i].t.toLowerCase().indexOf(ql)>-1||D[i].d.toLowerCase().indexOf(ql)>-1||D[i].k.toLowerCase().indexOf(ql)>-1){
 f.push(D[i]);
 }}
 document.getElementById('q2').value=q;
-var h='<div class="meta">Результаты 1-'+f.length+' из '+f.length+' &laquo;'+esc(q)+'&raquo;</div>';
+var h='<div class="meta">Результаты 1-'+f.length+' из '+f.length+' &laquo;'+esc(q)+
+'&raquo; <span class="tiny">&middot; фильтр '+(safeOn?'вкл':'выкл')+'</span></div>';
 if(f.length===0){
 h+='<div style="padding:8px;color:#aaa">Ничего не найдено.<br/><small>Проверьте запрос.</small></div>';
 }else{
@@ -244,11 +286,9 @@ document.getElementById('p3').style.display='block';
 var el=document.getElementById('iq');
 var q=document.getElementById('q').value||document.getElementById('q2').value;
 if(q)el.value=q;
-/* живой поиск: превью обновляется прямо при наборе */
 el.oninput=iqLive;
 el.onkeyup=iqLive;
 buildEng();
-/* превью стартует СРАЗУ, если запрос уже есть */
 var q0=el.value.replace(/^\s+|\s+$/g,'');
 if(q0){showImgs(q0);}else{document.getElementById('ires').innerHTML='';}
 window.scrollTo(0,0);
@@ -320,16 +360,17 @@ cprev(q);
 window.scrollTo(0,0);
 }
 
-/* полная перерисовка блока результатов */
 function drawIres(q,prevHtml,stamp){
 var eq=encodeURIComponent(q);
-var h='<div class="meta">Картинки &laquo;'+esc(q)+'&raquo;';
-if(stamp)h+=' <span class="tiny">&middot; обновлено '+stamp+'</span>';
-h+='</div><div id="cprev">'+prevHtml+'</div>';
+var h='<div class="meta">Картинки &laquo;'+esc(q)+'&raquo;'+
+' <span class="tiny">&middot; фильтр '+(safeOn?'вкл':'выкл');
+if(stamp)h+=' &middot; обновлено '+stamp;
+h+='</span></div><div id="cprev">'+prevHtml+'</div>';
 if(lastSel.length>0){
 h+='<div class="tiny center" style="margin-top:6px">Также искать:';
 for(var j=0;j<lastSel.length;j++){
-h+=' <a href="'+lastSel[j][1].replace('{q}',eq)+'">'+lastSel[j][0]+'</a>';
+var suf=safeOn?(lastSel[j][3]||''):(lastSel[j][4]||'');
+h+=' <a href="'+lastSel[j][1].replace('{q}',eq)+suf+'">'+lastSel[j][0]+'</a>';
 if(j<lastSel.length-1)h+=' &middot;';
 }
 h+='</div>';
@@ -343,13 +384,11 @@ drawIres(lastQ,'<div class="desc">Загрузка превью&hellip;</div>','
 cprev(lastQ);
 }
 
-/* Превью: CORS-открытый API Wikimedia Commons (origin=*).
-   Таймаут 12 сек + обрыв старого запроса, при сбое — [повторить]. */
 function cprev(q){
 var id=++prevReqId;
-var eq=encodeURIComponent(q);
+var qs=q+(safeOn?' -porn -nude -nsfw -erotic -hentai':'');
 var u='https://commons.wikimedia.org/w/api.php?action=query&format=json&origin=*'+
-'&generator=search&gsrnamespace=6&gsrlimit=8&gsrsearch='+eq+
+'&generator=search&gsrnamespace=6&gsrlimit=8&gsrsearch='+encodeURIComponent(qs)+
 '&prop=imageinfo&iiprop=url|thumburl&iiurlwidth=160';
 try{
 var x=new XMLHttpRequest();
@@ -365,7 +404,6 @@ if(x.status===200||x.status===0){
 try{
 var g=buildGrid(eval('('+x.responseText+')'));
 if(g){
-/* превью приехало — обновляем сайт */
 document.title='CloudBox::Картинки: '+q;
 drawIres(q,g,tm());
 return;
@@ -385,7 +423,6 @@ drawIres(q,'<div class="desc">Превью не загрузилось. '+
 '<a href="https://commons.wikimedia.org/w/index.php?search='+encodeURIComponent(q)+'">[открыть Commons]</a></div>','');
 }
 
-/* сетка ПОПОЛАМ: 2 в ряд */
 function buildGrid(r){
 if(!r||!r.query||!r.query.pages)return '';
 var p=r.query.pages;
@@ -395,11 +432,13 @@ h+='<table width="100%" cellpadding="0" cellspacing="2"><tr>';
 var n=0;
 for(var k in p){
 if(!p[k].imageinfo)continue;
+var title=p[k].title||'';
+if(safeOn&&BAD.test(title))continue;
 var ii=p[k].imageinfo[0];
 if(n>0&&n%2===0)h+='</tr><tr>';
 h+='<td align="center" width="50%">'+
 '<a href="'+ii.descriptionurl+'"><img class="th" src="'+ii.thumburl+'" width="95%" alt=""/></a>'+
-'<div class="tiny">'+esc(short(p[k].title||''))+'</div></td>';
+'<div class="tiny">'+esc(short(title))+'</div></td>';
 n++;
 }
 if(n===0)return '';
@@ -408,14 +447,12 @@ h+='</tr></table></div>';
 return h;
 }
 
-/* время для штампа "обновлено" */
 function tm(){
 var d=new Date();
 function z(v){return (v<10?'0':'')+v;}
 return z(d.getHours())+':'+z(d.getMinutes())+':'+z(d.getSeconds());
 }
 
-/* короткая подпись: убрать "File:" и расширение, обрезать */
 function short(s){
 s=s.replace(/^File:/i,'').replace(/\.[a-z0-9]+$/i,'');
 if(s.length>12){s=s.substring(0,11)+'...';}
@@ -428,7 +465,8 @@ try{return t.replace(new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')',
 
 function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
-/* старт: предзагрузка базы с GitHub */
+/* старт */
+updSafe();
 prefetchDB();
 //]]>
 </script>
