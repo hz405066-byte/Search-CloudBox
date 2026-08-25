@@ -1,0 +1,154 @@
+<!DOCTYPE html PUBLIC "-//WAPFORUM//DTD XHTML Mobile 1.0//EN" "http://www.wapforum.org/DTD/xhtml-mobile10.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="application/vnd.wap.xhtml+xml; charset=utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>CloudBox::О сайте</title>
+<link rel="icon" href="favicon.ico"/>
+<style>
+body{background:#111;color:#ddd;font-family:Arial,sans-serif;font-size:small;margin:2px;padding:2px}
+a{color:#8ab4f8;text-decoration:underline}
+a:visited{color:#c58af9}
+.center{text-align:center}
+.tiny{font-size:xx-small;color:#777}
+.desc{color:#aaa;font-size:x-small;margin-bottom:6px}
+hr{border:0;border-top:1px solid #333;margin:6px 0}
+.footer{text-align:center;font-size:xx-small;color:#555;margin-top:6px;margin-bottom:4px}
+.rhead{padding:2px 0;border-bottom:1px solid #333;margin-bottom:6px}
+.rlogo{color:#fff;font-weight:bold;font-size:x-small;white-space:nowrap;margin-right:4px}
+/* стили для маркдауна */
+h2.mdh{font-size:medium;color:#fff;margin:8px 0 4px 0}
+h3.mdh{font-size:small;color:#fff;margin:6px 0 3px 0}
+h4.mdh,h5.mdh{font-size:x-small;color:#ddd;margin:5px 0 2px 0}
+p.mdp{margin:4px 0;font-size:x-small;color:#ccc}
+.mdul{margin:2px 0 6px 0;padding-left:18px}
+.mdul li{margin:2px 0;font-size:x-small;color:#ccc}
+.mdq{border-left:2px solid #555;padding-left:6px;color:#aaa;font-size:x-small;margin:4px 0}
+code{background:#222;border:1px solid #444;padding:0 3px;font-family:monospace;font-size:x-small}
+pre.code{background:#222;border:1px solid #444;padding:4px;font-family:monospace;font-size:x-small;white-space:pre-wrap;margin:4px 0}
+</style>
+</head>
+<body>
+
+<div class="rhead">
+<table width="100%" cellpadding="0" cellspacing="0"><tr>
+<td><span class="rlogo">CloudBox::О сайте</span></td>
+<td align="right" class="tiny"><a href="index.html">на главную</a></td>
+</tr></table>
+</div>
+
+<div id="mdout"><div class="desc">Загрузка&hellip;</div></div>
+
+<div class="footer">&copy; 2026 CloudBox</div>
+
+<script>
+//<![CDATA[
+/* ===== ИНФО-СТРАНИЦА: читает README.md из репозитория ===== */
+
+var RD=[
+'https://raw.githubusercontent.com/hz405066-byte/Search-CloudBox/refs/heads/main/README.md',
+'https://raw.githubusercontent.com/hz405066-byte/Search-CloudBox/refs/heads/main/readme.md'
+];
+
+function xget(u,t,cb){
+var fin=false;
+function end(v){if(!fin){fin=true;cb(v);}}
+try{
+var x=new XMLHttpRequest();
+var tt=setTimeout(function(){end(null);},t);
+x.open('GET',u,true);
+x.onreadystatechange=function(){
+if(x.readyState===4){
+clearTimeout(tt);
+if(x.status===200||x.status===0){end(x.responseText);return;}
+end(null);
+}
+};
+x.send(null);
+}catch(e){end(null);}
+}
+
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+/* строчные штуки: код, жирный, курсив, ссылки */
+function inline(s){
+s=esc(s);
+s=s.replace(/`([^`]+)`/g,'<code>$1</code>');
+s=s.replace(/\*\*([^*]+)\*\*/g,'<b>$1</b>');
+s=s.replace(/\*([^*]+)\*/g,'<i>$1</i>');
+s=s.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g,'<a href="$2">$1</a>');
+return s;
+}
+
+/* простой маркдаун: заголовки, списки, цитаты, код-блоки, hr */
+function md2html(md){
+var lines=String(md).replace(/\r/g,'').split('\n');
+var h='',inList=false,inCode=false;
+function closeList(){if(inList){h+='</ul>';inList=false;}}
+for(var i=0;i<lines.length;i++){
+var s=lines[i];
+if(/^```/.test(s)){
+if(inCode){h+='</pre>';inCode=false;}
+else{closeList();h+='<pre class="code">';inCode=true;}
+continue;
+}
+if(inCode){h+=esc(s)+'\n';continue;}
+var t=s.replace(/^\s+|\s+$/g,'');
+if(!t){closeList();continue;}
+var m;
+if((m=t.match(/^(#{1,5})\s+(.*)/))){
+closeList();
+var l=m[1].length;
+var tag=(l<=2)?'h2':(l===3?'h3':'h4');
+h+='<'+tag+' class="mdh">'+inline(m[2])+'</'+tag+'>';
+continue;
+}
+if(/^(-{3,}|\*{3,})$/.test(t)){closeList();h+='<hr/>';continue;}
+if((m=t.match(/^[-*]\s+(.*)/))){
+if(!inList){h+='<ul class="mdul">';inList=true;}
+h+='<li>'+inline(m[1])+'</li>';
+continue;
+}
+if((m=t.match(/^>\s?(.*)/))){closeList();h+='<div class="mdq">'+inline(m[1])+'</div>';continue;}
+closeList();
+h+='<p class="mdp">'+inline(t)+'</p>';
+}
+closeList();
+if(inCode)h+='</pre>';
+return h;
+}
+
+/* запасной текст, если README нет или не доехал */
+function fallback(){
+var md='# CloudBox\n\n'+
+'Приватный поиск для кнопочных телефонов.\n\n'+
+'## Возможности\n\n'+
+'- Поиск по своей базе сайтов (db.json на GitHub)\n'+
+'- Картинки из нескольких источников, по 8 на экран\n'+
+'- Новости по RSS (РИА, Лента, BBC, Спорт-Экспресс)\n'+
+'- ИИ-собеседник и генератор картинок\n'+
+'- Фильтр 18+ на главной\n\n'+
+'## Как наполнять\n\n'+
+'Текст этой страницы берётся из файла **README.md** репозитория. '+
+'Отредактируйте README.md на GitHub — и страница «о сайте» обновится сама.\n';
+render(md);
+}
+
+function render(md){
+document.getElementById('mdout').innerHTML=md2html(md);
+window.scrollTo(0,0);
+}
+
+function loadReadme(i){
+if(i>=RD.length){fallback();return;}
+xget(RD[i],10000,function(t){
+if(t&&t.length>10&&!/404/.test(t.substring(0,20))){render(t);}
+else{loadReadme(i+1);}
+});
+}
+
+loadReadme(0);
+//]]>
+</script>
+</body>
+</html>

@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="application/vnd.wap.xhtml+xml; charset=utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>CloudBox | Спец Поиск для кнопочных телефонов</title>
+<title>CloudBox::Поиск:для:кнопочных:телефонов</title>
 <link rel="icon" href="favicon.ico"/>
 <style>
 body{background:#111;color:#ddd;font-family:Arial,sans-serif;font-size:small;margin:2px;padding:2px}
@@ -18,7 +18,7 @@ button{background:#333;color:#fff;border:1px solid #555;padding:4px 10px;font-si
 .title{font-size:small;font-weight:bold}
 .meta{font-size:xx-small;color:#777;margin-bottom:6px}
 hr{border:0;border-top:1px solid #333;margin:6px 0}
-.footer{text-align:center;font-size:xx-small;color:#555;margin-top:10px}
+.footer{text-align:center;font-size:xx-small;color:#555;margin-top:6px;margin-bottom:4px}
 .nav a{margin:0 4px;font-size:x-small;color:#999}
 .rhead{padding:2px 0;border-bottom:1px solid #333;margin-bottom:6px}
 .rlogo{color:#fff;font-weight:bold;font-size:x-small;white-space:nowrap;margin-right:4px}
@@ -35,6 +35,11 @@ hr{border:0;border-top:1px solid #333;margin:6px 0}
 img.th{border:1px solid #444;background:#000}
 #vimg{width:auto;height:auto}
 .xclose{color:#f88;font-weight:bold;font-size:small;text-decoration:none}
+.hist{margin:6px 0 2px 0;text-align:center;font-size:x-small;color:#999}
+.hist a{margin:0 3px;color:#c58af9}
+#p1{padding-bottom:80px}
+#bottomBar{position:fixed;bottom:0;left:0;right:0;background:#111;border-top:1px solid #333;padding:4px 2px;z-index:10}
+#bottomBar .nav{margin-bottom:2px}
 </style>
 </head>
 <body>
@@ -44,24 +49,40 @@ img.th{border:1px solid #444;background:#000}
 <div class="center" style="font-size:x-small;color:#888;margin-bottom:8px">Приватный поиск</div>
 <form onsubmit="return srch()">
 <div class="center">
-<input type="text" id="q" name="q"/><br/>
-<button type="submit">Поиск</button>
+<input type="text" id="q" name="q" accesskey="1"/><br/>
+<button type="submit" accesskey="*">Поиск</button>
 </div>
 </form>
 <div class="center tiny" style="margin-top:4px">
 фильтр: <a href="#" onclick="tSafe();return false">[ <span id="safest1">вкл</span> ]</a>
 </div>
-<hr/>
-<div class="nav center">
-<a href="#" onclick="openImg();return false">Картинки</a>|<a href="#">Новости</a>
+<div class="center" style="margin:6px 0 2px 0;font-size:x-small">
+<a href="#" onclick="cat('погода');return false">Погода</a> |
+<a href="#" onclick="cat('музыка');return false">Музыка</a> |
+<a href="#" onclick="cat('видео');return false">Видео</a> |
+<a href="#" onclick="cat('игры');return false">Игры</a>
 </div>
-<div class="footer">&copy; 2026 CloudBox<br/>Mobile Edition</div>
+<div class="center" style="margin:6px 0 2px 0;font-size:x-small">
+<a href="#" onclick="cat('спорт');return false">Спорт</a> |
+<a href="#" onclick="cat('вики');return false">Вики</a> |
+<a href="#" onclick="cat('чаты');return false">Чаты</a>
+</div>
+<!-- <div id="histBox" class="hist" style="display:none">
+раньше: <span id="histLinks"></span>
+</div> -->
+</div>
+
+<div id="bottomBar">
+<div class="nav center">
+<a href="info.html">о сайте</a>
+</div>
+<div class="footer">&copy; 2026 CloudBox</div>
 </div>
 
 <div id="p2" style="display:none">
 <div class="rhead">
 <table width="100%" cellpadding="0" cellspacing="0"><tr>
-<td><span class="rlogo">CloudBox::Результат</span></td>
+<td><span class="rlogo" id="resLogo">CloudBox::Результат</span></td>
 <td align="right" class="rform">
 <form onsubmit="return srch2()">
 <input type="text" id="q2"/>
@@ -70,7 +91,7 @@ img.th{border:1px solid #444;background:#000}
 </td>
 </tr></table>
 </div>
-<div class="tabs"><b>Результат</b><a href="#" onclick="toImg();return false">Картинки</a></div>
+<div class="tabs"><b>Результат</b><a href="#" onclick="toImg();return false">Картинки</a><a href="#" onclick="toAI();return false">ИИtest</a><a href="#" onclick="toNews();return false">Новости</a></div>
 <div id="res"></div>
 <hr/>
 <div class="nav center">
@@ -91,7 +112,7 @@ img.th{border:1px solid #444;background:#000}
 </td>
 </tr></table>
 </div>
-<div class="tabs"><a href="#" onclick="toWeb();return false">Результат</a><b>Картинки</b><a href="#" onclick="tEng();return false" class="tiny">[поисковики: <span id="engcnt">0</span>]</a></div>
+<div class="tabs"><a href="#" onclick="toWeb();return false">Результат</a><b>Картинки</b><a href="#" onclick="toAI();return false">ИИtest</a><a href="#" onclick="toNews();return false">Новости</a><a href="#" onclick="tEng();return false" class="tiny">[поисковики: <span id="engcnt">0</span>]</a></div>
 <div id="engs" class="engc" style="display:none"></div>
 <div id="engx" class="center tiny" style="display:none;margin-bottom:4px">
 <a href="#" onclick="allEng(1);return false">[все]</a>
@@ -102,10 +123,60 @@ img.th{border:1px solid #444;background:#000}
 <div class="nav center">
 <a href="#" onclick="hm();return false">&laquo; На главную</a>
 </div>
-<div class="footer">&copy; 2026 CloudBox<br/>Images Edition</div>
+<div class="footer">&copy; 2026 CloudBox</div>
 </div>
 
-<!-- ===== ПРОСМОТРЩИК ФОТО ===== -->
+<div id="p5" style="display:none">
+<div class="rhead">
+<table width="100%" cellpadding="0" cellspacing="0"><tr>
+<td><span class="rlogo">CloudBox::ИИtest</span></td>
+<td align="right" class="rform">
+<form onsubmit="return aiAsk()">
+<input type="text" id="aq"/>
+<button type="submit">OK</button>
+</form>
+</td>
+</tr></table>
+</div>
+<div class="tabs"><a href="#" onclick="toWeb();return false">Результат</a><a href="#" onclick="toImg();return false">Картинки</a><b>ИИtest</b><a href="#" onclick="toNews();return false">Новости</a></div>
+<div class="center" style="margin:4px 0">
+<button onclick="aiAsk()">Отправить</button>
+<button onclick="aiDraw()">Нарисовать</button>
+<a href="#" onclick="aiClear();return false" class="tiny">[очистить]</a>
+</div>
+<div id="aout"><div class="desc">Это диалог</div></div>
+<hr/>
+<div class="nav center">
+<a href="#" onclick="hm();return false">&laquo; На главную</a>
+</div>
+<div class="footer">&copy; 2026 CloudBox</div>
+</div>
+
+<div id="p6" style="display:none">
+<div class="rhead">
+<table width="100%" cellpadding="0" cellspacing="0"><tr>
+<td><span class="rlogo">CloudBox::Новости</span></td>
+<td align="right" class="rform">
+<a href="#" onclick="reloadNews();return false" class="tiny">[обновить]</a>
+</td>
+</tr></table>
+</div>
+<div class="tabs"><a href="#" onclick="toWeb();return false">Результат</a><a href="#" onclick="toImg();return false">Картинки</a><a href="#" onclick="toAI();return false">ИИtest</a><b>Новости</b></div>
+<div class="center tiny" style="margin:4px 0">
+источники: <a href="#" onclick="setFeed('РИА');return false">РИА</a> &middot;
+<a href="#" onclick="setFeed('Лента');return false">Лента</a> &middot;
+<a href="#" onclick="setFeed('BBC RU');return false">BBC</a> &middot;
+<a href="#" onclick="setFeed('СЭ');return false">Спорт</a> &middot;
+<a href="#" onclick="setFeed('все');return false">все</a>
+</div>
+<div id="newsOut"><div class="desc">Загрузка&hellip;</div></div>
+<hr/>
+<div class="nav center">
+<a href="#" onclick="hm();return false">&laquo; На главную</a>
+</div>
+<div class="footer">&copy; 2026 CloudBox</div>
+</div>
+
 <div id="p4" style="display:none">
 <div class="rhead">
 <table width="100%" cellpadding="0" cellspacing="0"><tr>
@@ -119,7 +190,6 @@ img.th{border:1px solid #444;background:#000}
 <button onclick="viewNext()">Вперёд &raquo;</button>
 <button onclick="viewGo()">Перейти</button>
 </div>
-<div class="footer">&copy; 2026 CloudBox</div>
 </div>
 
 <script>
@@ -127,12 +197,49 @@ img.th{border:1px solid #444;background:#000}
 var D=[];
 var loaded=false;
 var DB_URL='https://raw.githubusercontent.com/hz405066-byte/Search-CloudBox/refs/heads/main/db.json';
-
-/* КЛЮЧ PIXABAY (необязательно): вставьте между кавычек — источник оживёт */
 var PIXABAY_KEY='';
+var AI_LOCAL='ai?q=';
 
-/* 1 = вернуть Google/Яндекс через прокси; 0 = не дёргать прокси вообще */
-var USE_PROXY_SRC=0;
+function setC(k,v){try{document.cookie=k+'='+encodeURIComponent(v)+';max-age=7776000;path=/';}catch(e){}}
+function getC(k){try{var m=document.cookie.match(new RegExp('(?:^|; )'+k+'=([^;]*)'));return m?decodeURIComponent(m[1]):'';}catch(e){return '';}}
+function addHist(q){
+var list=getC('cbhist').split('|');
+list.push(q);
+var seen={};var out=[];
+for(var i=list.length-1;i>=0;i--){
+if(!list[i]||seen[list[i]])continue;
+seen[list[i]]=1;
+out.unshift(list[i]);
+if(out.length>=5)break;
+}
+setC('cbhist',out.join('|'));
+renderHist();
+}
+function renderHist(){
+var list=getC('cbhist').split('|');
+var box=document.getElementById('histBox');
+var el=document.getElementById('histLinks');
+if(!el||!list.length||!list[0]){if(box)box.style.display='none';return;}
+var h='';
+for(var i=0;i<list.length;i++){
+if(i)h+=' &middot; ';
+h+='<a href="#" onclick="srchHist(this.firstChild.data);return false">'+esc(list[i])+'</a>';
+}
+el.innerHTML=h;
+box.style.display='block';
+}
+function srchHist(q){
+document.getElementById('q').value=q;
+srch();
+}
+
+function showPage(id){
+var all=['p1','p2','p3','p4','p5','p6'];
+for(var i=0;i<all.length;i++){document.getElementById(all[i]).style.display='none';}
+document.getElementById(id).style.display='block';
+document.getElementById('bottomBar').style.display=(id==='p1')?'block':'none';
+window.scrollTo(0,0);
+}
 
 function parseDB(txt){
 if(!txt)return false;
@@ -185,6 +292,7 @@ x.open('GET',DB_URL,true);
 x.onreadystatechange=function(){
 if(x.readyState===4&&(x.status===200||x.status===0)){
 parseDB(x.responseText);
+renderHist();
 }
 };
 x.send(null);
@@ -206,7 +314,7 @@ var IMGEN=[
 ];
 
 var safeOn=1;
-var BAD=/\b(porn|porno|nude|nudity|nsfw|erotic|erotica|hentai|fetish|topless|genitals?|vagina|penis|breasts?|boobs|xxx|sex)\b/i;
+var BAD=/\b(porn|porno|nude|nudity|nsfw|erotic|erotica|hentai|fetish|topless|genitals?|vagina|penis|breasts?|boobs|xxx|sex|порно|ню|хентай|эротика|голая|голый)\b/i;
 var lastWebQ='';
 
 function updSafe(){
@@ -227,6 +335,7 @@ function srch(){
 loadDB();
 var q=document.getElementById('q').value;
 if(!q||!q.replace(/\s/g,''))return false;
+addHist(q);
 go(q);
 return false;
 }
@@ -235,20 +344,22 @@ function srch2(){
 loadDB();
 var q=document.getElementById('q2').value;
 if(!q||!q.replace(/\s/g,''))return false;
+addHist(q);
 go(q);
 return false;
 }
 
+function cat(c){
+document.getElementById('q').value=c;
+srch();
+}
+
 function toImg(){
-var q=document.getElementById('q2').value||lastWebQ;
-document.getElementById('p1').style.display='none';
-document.getElementById('p2').style.display='none';
-document.getElementById('p4').style.display='none';
-document.getElementById('p3').style.display='block';
+var q=document.getElementById('q2').value||document.getElementById('iq').value||lastWebQ;
+showPage('p3');
 document.getElementById('iq').value=q;
 buildEng();
 if(q)showImgs(q);
-window.scrollTo(0,0);
 }
 
 function toWeb(){
@@ -256,6 +367,12 @@ var q=document.getElementById('iq').value||lastQ;
 loadDB();
 document.getElementById('q2').value=q;
 go(q);
+}
+
+function toAI(){
+var q=document.getElementById('q2').value||document.getElementById('iq').value||lastWebQ||lastQ;
+showPage('p5');
+if(q){document.getElementById('aq').value=q;aiAsk();}
 }
 
 function go(q){
@@ -268,6 +385,7 @@ if(D[i].t.toLowerCase().indexOf(ql)>-1||D[i].d.toLowerCase().indexOf(ql)>-1||D[i
 f.push(D[i]);
 }}
 document.getElementById('q2').value=q;
+document.getElementById('resLogo').innerHTML='CloudBox::Результат';
 var h='<div class="meta">Результаты 1-'+f.length+' из '+f.length+' &laquo;'+esc(q)+
 '&raquo; <span class="tiny">&middot; фильтр '+(safeOn?'вкл':'выкл')+'</span></div>';
 if(f.length===0){
@@ -280,47 +398,266 @@ h+='<div style="margin-bottom:10px;padding-left:6px;border-left:2px solid #444">
 '<div class="desc">'+hl(f[j].d,q)+'</div></div>';
 }}
 document.getElementById('res').innerHTML=h;
-document.getElementById('p1').style.display='none';
-document.getElementById('p2').style.display='block';
-document.getElementById('p3').style.display='none';
-document.getElementById('p4').style.display='none';
-window.scrollTo(0,0);
+showPage('p2');
 }
 
 function bk(){
-document.getElementById('p2').style.display='none';
-document.getElementById('p3').style.display='none';
-document.getElementById('p4').style.display='none';
-document.getElementById('p1').style.display='block';
+showPage('p1');
 document.getElementById('q').value='';
-document.title='CloudBox';
-document.getElementById('q').focus();
+document.title='CloudBox::Поиск:для:кнопочных:телефонов';
+try{document.getElementById('q').focus();}catch(e){}
 }
 
 function hm(){
-document.getElementById('p2').style.display='none';
-document.getElementById('p3').style.display='none';
-document.getElementById('p4').style.display='none';
-document.getElementById('p1').style.display='block';
-document.title='CloudBox';
+showPage('p1');
+document.title='CloudBox::Поиск:для:кнопочных:телефонов';
+}
+
+/* ===== НОВОСТИ (постепенно по 8) ===== */
+var NEWS_FEEDS={
+'РИА':{u:'https://ria.ru/export/rss2/archive/index.xml'},
+'Лента':{u:'https://lenta.ru/rss'},
+'BBC RU':{u:'https://feeds.bbci.co.uk/russian/rss.xml'},
+'СЭ':{u:'https://www.sport-express.ru/rss/'}
+};
+var NEWS_ALL=['РИА','Лента','BBC RU','СЭ'];
+var NEWS_CUR='все';
+var NEWS_ITEMS=[];
+var shownNews=0;
+
+function toNews(){
+showPage('p6');
+loadNews();
+}
+
+function setFeed(src){
+NEWS_CUR=src;
+loadNews();
+}
+
+function reloadNews(){loadNews();}
+
+function loadNews(){
+var out=document.getElementById('newsOut');
+out.innerHTML='<div class="desc">Загрузка&hellip;</div>';
+var names=(NEWS_CUR==='все')?NEWS_ALL:[NEWS_CUR];
+var items=[];
+var done=0;
+var total=names.length;
+NEWS_ITEMS=[];
+shownNews=0;
+function finish(){
+if(++done<total)return;
+items.sort(function(a,b){return b.ts-a.ts;});
+NEWS_ITEMS=items;
+renderNews();
+}
+for(var i=0;i<names.length;i++){
+(function(name){
+var f=NEWS_FEEDS[name];
+if(!f){finish();return;}
+var u='https://api.allorigins.win/raw?url='+encodeURIComponent(f.u);
+xget(u,12000,function(t){
+items=items.concat(parseRSS(t,name));
+finish();
+});
+})(names[i]);
+}
+}
+
+function renderNews(){
+var out=document.getElementById('newsOut');
+var items=NEWS_ITEMS;
+var h='<div class="meta">Найдено: '+items.length+' &middot; '+
+(NEWS_CUR==='все'?'все источники':NEWS_CUR)+
+' <span class="tiny">&middot; '+tm()+'</span></div>';
+if(!items.length){
+h+='<div class="desc">Не удалось загрузить новости.<br/>'+
+'<a href="#" onclick="reloadNews();return false">[повторить]</a></div>';
+out.innerHTML=h;
+return;
+}
+if(shownNews===0)shownNews=Math.min(8,items.length);
+for(var i=0;i<shownNews;i++){
+var it=items[i];
+h+='<div style="margin-bottom:10px;padding-left:6px;border-left:2px solid #444">'+
+'<div class="title"><a href="'+it.url+'">'+esc(it.title)+'</a></div>'+
+'<div class="tiny">'+esc(it.src)+' &middot; '+esc(it.date)+'</div>'+
+(it.desc?'<div class="desc">'+esc(it.desc)+'</div>':'')+
+'</div>';
+}
+if(shownNews<items.length){
+h+='<div class="center" style="margin-top:6px"><a href="#" onclick="moreNews();return false">[ещё новости: '+Math.min(8,items.length-shownNews)+']</a></div>';
+}
+out.innerHTML=h;
 window.scrollTo(0,0);
 }
 
-function openImg(){
-document.getElementById('p1').style.display='none';
-document.getElementById('p2').style.display='none';
-document.getElementById('p4').style.display='none';
-document.getElementById('p3').style.display='block';
-var el=document.getElementById('iq');
-var q=document.getElementById('q').value||document.getElementById('q2').value;
-if(q)el.value=q;
-el.oninput=iqLive;
-el.onkeyup=iqLive;
-buildEng();
-var q0=el.value.replace(/^\s+|\s+$/g,'');
-if(q0){showImgs(q0);}else{document.getElementById('ires').innerHTML='';}
-window.scrollTo(0,0);
-try{el.focus();}catch(e){}
+function moreNews(){
+shownNews=Math.min(NEWS_ITEMS.length,shownNews+8);
+renderNews();
+}
+
+function parseRSS(xml,src){
+var out=[];
+if(!xml)return out;
+var re=/<item>([\s\S]*?)<\/item>/g;
+var m;
+while((m=re.exec(xml))!==null&&out.length<20){
+var item=m[1];
+var title=(item.match(/<title>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/title>/)||[])[1]||'';
+var link=(item.match(/<link>([\s\S]*?)<\/link>/)||[])[1]||'';
+var desc=(item.match(/<description>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/description>/)||[])[1]||'';
+var date=(item.match(/<pubDate>([\s\S]*?)<\/pubDate>/)||[])[1]||'';
+title=title.replace(/<[^>]+>/g,'').replace(/\s+/g,' ');
+desc=desc.replace(/<[^>]+>/g,'').replace(/\s+/g,' ');
+if(desc.length>160)desc=desc.substring(0,157)+'...';
+var ts=0;
+try{ts=new Date(date).getTime();}catch(e){}
+var dStr='';
+try{var d=new Date(date);dStr=d.getDate()+'.'+(d.getMonth()+1)+' '+('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2);}catch(e){}
+if(title&&link)out.push({title:title,url:link,desc:desc,date:dStr,ts:ts,src:src});
+}
+return out;
+}
+
+/* ===== ИИ ===== */
+var CHAT=[];
+
+function jesc(s){return String(s).replace(/\\/g,'\\\\').replace(/"/g,'\\"');}
+
+function jmsgs(arr){
+var s='[';
+for(var i=0;i<arr.length;i++){
+if(i)s+=',';
+s+='{"role":"'+arr[i].role+'","content":"'+jesc(arr[i].content)+'"}';
+}
+return s+']';
+}
+
+function xget(u,t,cb){
+var fin=false;
+function end(v){if(!fin){fin=true;cb(v);}}
+try{
+var x=new XMLHttpRequest();
+var tt=setTimeout(function(){end(null);},t);
+x.open('GET',u,true);
+x.onreadystatechange=function(){
+if(x.readyState===4){
+clearTimeout(tt);
+if(x.status===200||x.status===0){end(x.responseText);return;}
+end(null);
+}
+};
+x.send(null);
+}catch(e){end(null);}
+}
+
+function xpost(u,body,t,cb){
+var fin=false;
+function end(v){if(!fin){fin=true;cb(v);}}
+try{
+var x=new XMLHttpRequest();
+var tt=setTimeout(function(){end(null);},t);
+x.open('POST',u,true);
+x.setRequestHeader('Content-Type','application/json');
+x.onreadystatechange=function(){
+if(x.readyState===4){
+clearTimeout(tt);
+if(x.status===200||x.status===0){end(x.responseText);return;}
+end(null);
+}
+};
+x.send(body);
+}catch(e){end(null);}
+}
+
+function parseAI(t){
+if(!t)return null;
+var s=t.replace(/^\s+/,'');
+if(s.charAt(0)==='{'){
+try{
+var r=eval('('+s+')');
+if(r&&r.choices&&r.choices[0]&&r.choices[0].message)return r.choices[0].message.content;
+}catch(e){}
+return null;
+}
+if(t.length>2)return t;
+return null;
+}
+
+function chatLine(who,txt){
+var out=document.getElementById('aout');
+out.innerHTML+='<div class="meta">'+who+'</div>'+
+'<div class="desc" style="white-space:pre-wrap;color:#ddd">'+esc(txt)+'</div>';
+window.scrollTo(0,document.body.scrollHeight);
+}
+
+function aiClear(){
+CHAT=[];
+document.getElementById('aout').innerHTML='<div class="desc">Диалог сброшен. Пишите новую фразу.</div>';
+return false;
+}
+
+function aiAsk(){
+var q=document.getElementById('aq').value.replace(/^\s+|\s+$/g,'');
+if(!q)return false;
+document.getElementById('aq').value='';
+chatLine('Вы',q);
+CHAT.push({role:'user',content:q});
+if(CHAT.length>10)CHAT=CHAT.slice(-10);
+var think='<div class="desc">ИИ думает&hellip;</div>';
+var out=document.getElementById('aout');
+out.innerHTML+=think;
+var mark=out.innerHTML.length-think.length;
+function done(a,src){
+out.innerHTML=out.innerHTML.substring(0,mark);
+if(a){
+CHAT.push({role:'assistant',content:a});
+chatLine('ИИ'+(src?' ('+src+')':''),a);
+}else{
+chatLine('ИИ','(не ответил — попробуйте ещё раз или перефразируйте)');
+}
+}
+aiChat(q,function(a,src){done(a,src);});
+return false;
+}
+
+function aiChat(q,cb){
+xget(AI_LOCAL+encodeURIComponent(q),8000,function(t0){
+if(t0&&t0.length>2&&t0.length<5000&&!/<html/i.test(t0)){cb(t0,'ваш ИИ');return;}
+var msgs=[{role:'system',content:'Ты помощник CloudBox. Отвечай кратко и по-русски.'}];
+for(var i=0;i<CHAT.length;i++)msgs.push(CHAT[i]);
+var body='{"model":"openai","messages":'+jmsgs(msgs)+'}';
+xpost('https://text.pollinations.ai/openai',body,20000,function(t1){
+var a=parseAI(t1);
+if(a){cb(a,'');return;}
+xpost('https://text.pollinations.ai/',body,20000,function(t2){
+var b=parseAI(t2);
+if(b){cb(b,'');return;}
+xget('https://text.pollinations.ai/'+encodeURIComponent(q)+'?model=openai',15000,function(t3){
+var c=parseAI(t3);
+if(c){cb(c,'');return;}
+xget('https://ru.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent(q.split(/\s+/)[0]),10000,function(t4){
+var ex=null;
+try{var w=eval('('+t4+')');ex=w.extract||null;}catch(e){}
+cb(ex,'Википедия');
+});
+});
+});
+});
+});
+}
+
+function aiDraw(){
+var q=document.getElementById('aq').value.replace(/^\s+|\s+$/g,'');
+if(!q)return false;
+var u='https://image.pollinations.ai/prompt/'+encodeURIComponent(q)+'?width=320&height=320&nologo=true';
+VIEWS=[{full:u,go:u}];
+vCur=0;
+vBack='p5';
+showView();
+return false;
 }
 
 function buildEng(){
@@ -356,19 +693,20 @@ for(var i=0;i<c.length;i++){if(c[i].checked)n++;}
 document.getElementById('engcnt').innerHTML=''+n;
 }
 
-/* ===== КАРТИНКИ: ядро без ключей и прокси (Commons, Openverse, Flickr, Reddit) ===== */
+/* ===== КАРТИНКИ ===== */
 var lastQ='';
 var lastSel=[];
 var prevReqId=0;
 var imgTimer=null;
 var VIEWS=[];
 var vCur=0;
+var vBack='p3';
 var ITEMS=[];
 var shownCount=0;
 var flickrSeq=0;
 
 function addView(full,go){VIEWS.push({full:full,go:go});return VIEWS.length-1;}
-function openView(i){vCur=i;showView();}
+function openView(i){vCur=i;vBack='p3';showView();}
 
 function fitView(){
 var img=document.getElementById('vimg');
@@ -388,20 +726,14 @@ var v=VIEWS[vCur];
 if(!v)return;
 fitView();
 document.getElementById('vimg').src=v.full;
-document.getElementById('p1').style.display='none';
-document.getElementById('p2').style.display='none';
-document.getElementById('p3').style.display='none';
-document.getElementById('p4').style.display='block';
-window.scrollTo(0,0);
+showPage('p4');
 }
 
 function viewPrev(){if(VIEWS.length){vCur=(vCur-1+VIEWS.length)%VIEWS.length;showView();}}
 function viewNext(){if(VIEWS.length){vCur=(vCur+1)%VIEWS.length;showView();}}
 function viewGo(){if(VIEWS[vCur])window.location.href=VIEWS[vCur].go;}
 function closeView(){
-document.getElementById('p4').style.display='none';
-document.getElementById('p3').style.display='block';
-window.scrollTo(0,0);
+showPage(vBack||'p3');
 }
 
 function iqLive(){
@@ -456,7 +788,6 @@ drawIres(lastQ,'<div class="desc">Загрузка превью&hellip;</div>','
 cprev(lastQ);
 }
 
-/* быстрые сразу (8 на экран), остальные догоняют параллельно */
 function cprev(q){
 var id=++prevReqId;
 ITEMS=[];
@@ -472,7 +803,8 @@ srcOpenverse(q,function(L2){
 if(id!==prevReqId)return;
 if(L2)ITEMS=ITEMS.concat(L2);
 firstDraw();
-if(USE_PROXY_SRC){srcGoogle(q,add);srcYandex(q,add);}
+srcGoogle(q,add);
+srcYandex(q,add);
 srcPixabay(q,add);
 srcFlickr(q,add);
 srcReddit(q,add);
@@ -506,7 +838,6 @@ drawIres(lastQ,g,tm());
 }
 }
 
-/* 1: до 20 */
 function srcCommons(q,done){
 var fin=false;
 function end(v){if(!fin){fin=true;done(v);}}
@@ -548,7 +879,6 @@ x.send(null);
 }catch(e){end(null);}
 }
 
-/* 2: до 10 */
 function srcOpenverse(q,done){
 var fin=false;
 function end(v){if(!fin){fin=true;done(v);}}
@@ -582,7 +912,6 @@ x.send(null);
 }catch(e){end(null);}
 }
 
-/* 3: Google через прокси (только при USE_PROXY_SRC=1) */
 function srcGoogle(q,done){
 var fin=false;
 function end(v){if(!fin){fin=true;done(v);}}
@@ -613,7 +942,6 @@ x.send(null);
 }catch(e){end(null);}
 }
 
-/* 4: Яндекс через прокси (только при USE_PROXY_SRC=1) */
 function srcYandex(q,done){
 var fin=false;
 function end(v){if(!fin){fin=true;done(v);}}
@@ -644,7 +972,6 @@ x.send(null);
 }catch(e){end(null);}
 }
 
-/* 5: Pixabay, только с ключом, до 10 */
 function srcPixabay(q,done){
 if(!PIXABAY_KEY){done(null);return;}
 var fin=false;
@@ -680,7 +1007,6 @@ x.send(null);
 }catch(e){end(null);}
 }
 
-/* 6: Flickr без ключа — JSONP, до 10 */
 function srcFlickr(q,done){
 var fin=false;
 function end(v){if(!fin){fin=true;done(v);}}
@@ -718,7 +1044,6 @@ document.getElementsByTagName('head')[0].appendChild(sc);
 }catch(e){clearTimeout(t);cleanup();end(null);}
 }
 
-/* 7: Reddit без ключа, до 10; over_18 прячется фильтром */
 function srcReddit(q,done){
 var fin=false;
 function end(v){if(!fin){fin=true;done(v);}}
@@ -755,7 +1080,6 @@ x.send(null);
 }catch(e){end(null);}
 }
 
-/* сетка по 8 из пула */
 function renderSlice(){
 VIEWS=[];
 var items=ITEMS.slice(0,shownCount);
@@ -791,10 +1115,12 @@ function hl(t,q){
 try{return t.replace(new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'),'<b>$1</b>');}catch(e){return t;}
 }
 
-function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
 updSafe();
 prefetchDB();
+renderHist();
+showPage('p1');
 //]]>
 </script>
 </body>
