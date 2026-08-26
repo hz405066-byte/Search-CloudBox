@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="application/vnd.wap.xhtml+xml; charset=utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>CloudBox::Поиск:для:кнопочных:телефонов</title>
+<title>CloudBox::Поиск</title>
 <link rel="icon" href="favicon.ico"/>
 <style>
 body{background:#111;color:#ddd;font-family:Arial,sans-serif;font-size:small;margin:2px;padding:2px}
@@ -45,7 +45,7 @@ img.th{border:1px solid #444;background:#000}
 <body>
 <div id="p1">
 <h1>CloudBox</h1>
-<div class="center" style="font-size:x-small;color:#888;margin-bottom:8px">Приватный поиск</div>
+<div class="center" style="font-size:x-small;color:#888;margin-bottom:8px">Локальный поиск</div>
 <form onsubmit="return srch()">
 <div class="center">
 <input type="text" id="q" name="q" accesskey="1"/><br/>
@@ -88,7 +88,7 @@ img.th{border:1px solid #444;background:#000}
 </td>
 </tr></table>
 </div>
-<div class="tabs"><b>Результат</b><a href="#" onclick="toImg();return false">Картинки</a><a href="#" onclick="toAI();return false">ИИtest</a><a href="#" onclick="toNews();return false">Новости</a></div>
+<div class="tabs"><b>Результат</b><a href="#" onclick="toImg();return false">Картинки</a><a href="#" onclick="toNews();return false">Новости</a></div>
 <div id="res"></div>
 <hr/>
 <div class="nav center">
@@ -108,38 +108,13 @@ img.th{border:1px solid #444;background:#000}
 </td>
 </tr></table>
 </div>
-<div class="tabs"><a href="#" onclick="toWeb();return false">Результат</a><b>Картинки</b><a href="#" onclick="toAI();return false">ИИtest</a><a href="#" onclick="toNews();return false">Новости</a><a href="#" onclick="tEng();return false" class="tiny">[поисковики: <span id="engcnt">0</span>]</a></div>
+<div class="tabs"><a href="#" onclick="toWeb();return false">Результат</a><b>Картинки</b><a href="#" onclick="toNews();return false">Новости</a><a href="#" onclick="tEng();return false" class="tiny">[поисковики: <span id="engcnt">0</span>]</a></div>
 <div id="engs" class="engc" style="display:none"></div>
 <div id="engx" class="center tiny" style="display:none;margin-bottom:4px">
 <a href="#" onclick="allEng(1);return false">[все]</a>
 <a href="#" onclick="allEng(0);return false">[никто]</a>
 </div>
 <div id="ires"></div>
-<hr/>
-<div class="nav center">
-<a href="#" onclick="hm();return false">&laquo; На главную</a>
-</div>
-<div class="footer">&copy; 2026 CloudBox</div>
-</div>
-<div id="p5" style="display:none">
-<div class="rhead">
-<table width="100%" cellpadding="0" cellspacing="0"><tr>
-<td><span class="rlogo">CloudBox::ИИtest</span></td>
-<td align="right" class="rform">
-<form onsubmit="return aiAsk()">
-<input type="text" id="aq"/>
-<button type="submit">OK</button>
-</form>
-</td>
-</tr></table>
-</div>
-<div class="tabs"><a href="#" onclick="toWeb();return false">Результат</a><a href="#" onclick="toImg();return false">Картинки</a><b>ИИtest</b><a href="#" onclick="toNews();return false">Новости</a></div>
-<div class="center" style="margin:4px 0">
-<button onclick="aiAsk()">Отправить</button>
-<button onclick="aiDraw()">Нарисовать</button>
-<a href="#" onclick="aiClear();return false" class="tiny">[очистить]</a>
-</div>
-<div id="aout"><div class="desc">Это диалог</div></div>
 <hr/>
 <div class="nav center">
 <a href="#" onclick="hm();return false">&laquo; На главную</a>
@@ -155,7 +130,7 @@ img.th{border:1px solid #444;background:#000}
 </td>
 </tr></table>
 </div>
-<div class="tabs"><a href="#" onclick="toWeb();return false">Результат</a><a href="#" onclick="toImg();return false">Картинки</a><a href="#" onclick="toAI();return false">ИИtest</a><b>Новости</b></div>
+<div class="tabs"><a href="#" onclick="toWeb();return false">Результат</a><a href="#" onclick="toImg();return false">Картинки</a><b>Новости</b></div>
 <div class="center tiny" style="margin:4px 0">
 источники: <a href="#" onclick="setFeed('РИА');return false">РИА</a> &middot;
 <a href="#" onclick="setFeed('Лента');return false">Лента</a> &middot;
@@ -188,9 +163,34 @@ img.th{border:1px solid #444;background:#000}
 //<![CDATA[
 var D=[];
 var loaded=false;
-var DB_URL='https://raw.githubusercontent.com/hz405066-byte/Search-CloudBox/refs/heads/main/db.json';
-var PIXABAY_KEY='';
-var AI_LOCAL='ai?q=';
+
+/* ===== ЛОКАЛЬНЫЕ САЙТЫ ===== */
+/* Добавляй сюда свои HTML файлы, которые лежат рядом с index.html */
+var LOCAL_SITES=[];
+
+function makeHref(u){
+u=String(u);
+if(u.indexOf('./')===0)return u;
+if(u.indexOf('../')===0)return u;
+if(u.indexOf('http://')===0)return u;
+if(u.indexOf('https://')===0)return u;
+if(u.indexOf('/')===0)return u;
+if(u.indexOf('.html')>-1)return u;
+if(u.indexOf('.htm')>-1)return u;
+return 'http://'+u;
+}
+
+function addLocalSites(){
+if(typeof LOCAL_SITES==='undefined')return;
+for(var i=0;i<LOCAL_SITES.length;i++){
+var exists=false;
+for(var j=0;j<D.length;j++){
+if(D[j].u===LOCAL_SITES[i].u&&D[j].t===LOCAL_SITES[i].t){exists=true;break;}
+}
+if(!exists)D.push(LOCAL_SITES[i]);
+}
+}
+
 function setC(k,v){try{document.cookie=k+'='+encodeURIComponent(v)+';max-age=7776000;path=/';}catch(e){}}
 function getC(k){try{var m=document.cookie.match(new RegExp('(?:^|; )'+k+'=([^;]*)'));return m?decodeURIComponent(m[1]):'';}catch(e){return '';}}
 function addHist(q){
@@ -224,7 +224,7 @@ document.getElementById('q').value=q;
 srch();
 }
 function showPage(id){
-var all=['p1','p2','p3','p4','p5','p6'];
+var all=['p1','p2','p3','p4','p6'];
 for(var i=0;i<all.length;i++){document.getElementById(all[i]).style.display='none';}
 document.getElementById(id).style.display='block';
 document.getElementById('bottomBar').style.display=(id==='p1')?'block':'none';
@@ -261,28 +261,20 @@ return '';
 }
 function loadDB(){
 if(loaded)return;
-if(parseDB(fetchSync(DB_URL)))return;
-if(parseDB(fetchSync('db.json')))return;
+// Читаем ТОЛЬКО локальный db.json
+if(parseDB(fetchSync('db.json'))){addLocalSites();return;}
+// Если файла нет, используем заглушку + локальные сайты
 D=[
 {t:"CloudBox Mail",u:"mail.cloudbox.net",d:"Зашифрованная почта.",k:"почта mail"},
 {t:"Java Games",u:"jgames.cb.net",d:"Java игры бесплатно.",k:"игры java jar"},
 {t:"Погода",u:"wthr.cb.net",d:"Прогноз погоды.",k:"погода прогноз"}
 ];
+addLocalSites();
 loaded=true;
 }
 function prefetchDB(){
-if(loaded)return;
-try{
-var x=new XMLHttpRequest();
-x.open('GET',DB_URL,true);
-x.onreadystatechange=function(){
-if(x.readyState===4&&(x.status===200||x.status===0)){
-parseDB(x.responseText);
-renderHist();
-}
-};
-x.send(null);
-}catch(e){}
+// Ничего не делаем, чтобы не обращаться к сети
+return;
 }
 var IMGEN=[
 ['DuckDuckGo','https://duckduckgo.com/?q={q}&iax=images&ia=i',1,'&kp=1','&kp=-1'],
@@ -346,11 +338,6 @@ loadDB();
 document.getElementById('q2').value=q;
 go(q);
 }
-function toAI(){
-var q=document.getElementById('q2').value||document.getElementById('iq').value||lastWebQ||lastQ;
-showPage('p5');
-if(q){document.getElementById('aq').value=q;aiAsk();}
-}
 function showUseful(q){
 loadDB();
 var f=[];
@@ -366,7 +353,7 @@ h+='<div style="padding:8px;color:#aaa">Нет отмеченных сайтов
 }else{
 for(var j=0;j<f.length;j++){
 h+='<div style="margin-bottom:10px;padding-left:6px;border-left:2px solid #444">'+
-'<div class="title"><a href="http://'+f[j].u+'">'+f[j].t+' <img src="emoji.png" alt="" style="width:14px;height:14px;vertical-align:middle;" /></a></div>'+
+'<div class="title"><a href="'+makeHref(f[j].u)+'">'+f[j].t+' <img src="emoji.png" alt="" style="width:14px;height:14px;vertical-align:middle;" /></a></div>'+
 '<div class="url">'+f[j].u+'</div>'+
 '<div class="desc">'+f[j].d+'</div></div>';
 }}
@@ -397,7 +384,7 @@ h+='<div style="padding:8px;color:#aaa">Ничего не найдено.<br/><s
 for(var j=0;j<f.length;j++){
 var em = f[j].e ? ' <img src="emoji.png" alt="" style="width:14px;height:14px;vertical-align:middle;" />' : '';
 h+='<div style="margin-bottom:10px;padding-left:6px;border-left:2px solid #444">'+
-'<div class="title"><a href="http://'+f[j].u+'">'+hl(f[j].t,q)+em+'</a></div>'+
+'<div class="title"><a href="'+makeHref(f[j].u)+'">'+hl(f[j].t,q)+em+'</a></div>'+
 '<div class="url">'+f[j].u+'</div>'+
 '<div class="desc">'+hl(f[j].d,q)+'</div></div>';
 }}
@@ -407,12 +394,12 @@ showPage('p2');
 function bk(){
 showPage('p1');
 document.getElementById('q').value='';
-document.title='CloudBox::Поиск:для:кнопочных:телефонов';
+document.title='CloudBox::Поиск';
 try{document.getElementById('q').focus();}catch(e){}
 }
 function hm(){
 showPage('p1');
-document.title='CloudBox::Поиск:для:кнопочных:телефонов';
+document.title='CloudBox::Поиск';
 }
 /* ===== НОВОСТИ (постепенно по 8) ===== */
 var NEWS_FEEDS={
@@ -514,17 +501,6 @@ if(title&&link)out.push({title:title,url:link,desc:desc,date:dStr,ts:ts,src:src}
 }
 return out;
 }
-/* ===== ИИ ===== */
-var CHAT=[];
-function jesc(s){return String(s).replace(/\\/g,'\\\\').replace(/"/g,'\\"');}
-function jmsgs(arr){
-var s='[';
-for(var i=0;i<arr.length;i++){
-if(i)s+=',';
-s+='{"role":"'+arr[i].role+'","content":"'+jesc(arr[i].content)+'"}';
-}
-return s+']';
-}
 function xget(u,t,cb){
 var fin=false;
 function end(v){if(!fin){fin=true;cb(v);}}
@@ -541,106 +517,6 @@ end(null);
 };
 x.send(null);
 }catch(e){end(null);}
-}
-function xpost(u,body,t,cb){
-var fin=false;
-function end(v){if(!fin){fin=true;cb(v);}}
-try{
-var x=new XMLHttpRequest();
-var tt=setTimeout(function(){end(null);},t);
-x.open('POST',u,true);
-x.setRequestHeader('Content-Type','application/json');
-x.onreadystatechange=function(){
-if(x.readyState===4){
-clearTimeout(tt);
-if(x.status===200||x.status===0){end(x.responseText);return;}
-end(null);
-}
-};
-x.send(body);
-}catch(e){end(null);}
-}
-function parseAI(t){
-if(!t)return null;
-var s=t.replace(/^\s+/,'');
-if(s.charAt(0)==='{'){
-try{
-var r=eval('('+s+')');
-if(r&&r.choices&&r.choices[0]&&r.choices[0].message)return r.choices[0].message.content;
-}catch(e){}
-return null;
-}
-if(t.length>2)return t;
-return null;
-}
-function chatLine(who,txt){
-var out=document.getElementById('aout');
-out.innerHTML+='<div class="meta">'+who+'</div>'+
-'<div class="desc" style="white-space:pre-wrap;color:#ddd">'+esc(txt)+'</div>';
-window.scrollTo(0,document.body.scrollHeight);
-}
-function aiClear(){
-CHAT=[];
-document.getElementById('aout').innerHTML='<div class="desc">Диалог сброшен. Пишите новую фразу.</div>';
-return false;
-}
-function aiAsk(){
-var q=document.getElementById('aq').value.replace(/^\s+|\s+$/g,'');
-if(!q)return false;
-document.getElementById('aq').value='';
-chatLine('Вы',q);
-CHAT.push({role:'user',content:q});
-if(CHAT.length>10)CHAT=CHAT.slice(-10);
-var think='<div class="desc">ИИ думает&hellip;</div>';
-var out=document.getElementById('aout');
-out.innerHTML+=think;
-var mark=out.innerHTML.length-think.length;
-function done(a,src){
-out.innerHTML=out.innerHTML.substring(0,mark);
-if(a){
-CHAT.push({role:'assistant',content:a});
-chatLine('ИИ'+(src?' ('+src+')':''),a);
-}else{
-chatLine('ИИ','(не ответил — попробуйте ещё раз или перефразируйте)');
-}
-}
-aiChat(q,function(a,src){done(a,src);});
-return false;
-}
-function aiChat(q,cb){
-xget(AI_LOCAL+encodeURIComponent(q),8000,function(t0){
-if(t0&&t0.length>2&&t0.length<5000&&!/<html/i.test(t0)){cb(t0,'ваш ИИ');return;}
-var msgs=[{role:'system',content:'Ты помощник CloudBox. Отвечай кратко и по-русски.'}];
-for(var i=0;i<CHAT.length;i++)msgs.push(CHAT[i]);
-var body='{"model":"openai","messages":'+jmsgs(msgs)+'}';
-xpost('https://text.pollinations.ai/openai',body,20000,function(t1){
-var a=parseAI(t1);
-if(a){cb(a,'');return;}
-xpost('https://text.pollinations.ai/',body,20000,function(t2){
-var b=parseAI(t2);
-if(b){cb(b,'');return;}
-xget('https://text.pollinations.ai/'+encodeURIComponent(q)+'?model=openai',15000,function(t3){
-var c=parseAI(t3);
-if(c){cb(c,'');return;}
-xget('https://ru.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent(q.split(/\s+/)[0]),10000,function(t4){
-var ex=null;
-try{var w=eval('('+t4+')');ex=w.extract||null;}catch(e){}
-cb(ex,'Википедия');
-});
-});
-});
-});
-});
-}
-function aiDraw(){
-var q=document.getElementById('aq').value.replace(/^\s+|\s+$/g,'');
-if(!q)return false;
-var u='https://image.pollinations.ai/prompt/'+encodeURIComponent(q)+'?width=320&height=320&nologo=true';
-VIEWS=[{full:u,go:u}];
-vCur=0;
-vBack='p5';
-showView();
-return false;
 }
 function buildEng(){
 var box=document.getElementById('engs');
@@ -933,38 +809,8 @@ x.send(null);
 }catch(e){end(null);}
 }
 function srcPixabay(q,done){
-if(!PIXABAY_KEY){done(null);return;}
-var fin=false;
-function end(v){if(!fin){fin=true;done(v);}}
-try{
-var u='https://pixabay.com/api/?key='+PIXABAY_KEY+'&q='+encodeURIComponent(q)+
-'&image_type=photo&per_page=10'+(safeOn?'&safesearch=true':'');
-var x=new XMLHttpRequest();
-var t=setTimeout(function(){end(null);},8000);
-x.open('GET',u,true);
-x.onreadystatechange=function(){
-if(x.readyState===4){
-clearTimeout(t);
-if(x.status===200||x.status===0){
-try{
-var r=eval('('+x.responseText+')');
-var out=[];
-if(r&&r.hits){
-for(var i=0;i<r.hits.length;i++){
-var it=r.hits[i];
-if(!it||!it.previewURL)continue;
-out.push({th:it.previewURL,full:it.webformatURL||it.previewURL,go:it.pageURL||it.webformatURL,cap:short(it.tags||'pixabay')});
-if(out.length>=10)break;
-}
-}
-end(out);return;
-}catch(e){}
-}
-end(null);
-}
-};
-x.send(null);
-}catch(e){end(null);}
+// Ключ пустой, поэтому просто возвращаем null
+done(null);
 }
 function srcFlickr(q,done){
 var fin=false;
